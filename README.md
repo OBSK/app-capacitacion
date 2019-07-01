@@ -1,5 +1,6 @@
 # capacitacion-app
 
+Created by Jorge Arturo Huima Ruiz
 ## Project setup
 ```
 npm install
