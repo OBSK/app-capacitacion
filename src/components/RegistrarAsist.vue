@@ -50,12 +50,74 @@
                     <v-data-table
                     :headers="headers"
                     :items="asistentes">
+                    <template v-slot:items="props">
+                        <td> {{ props.item.dni }} </td>
+                        <td> {{ props.item.datos }} </td>
+                        <td> {{ props.item.profesion }} </td>
+                        <td> {{ props.item.ciudad }} </td>
+                        <td class="justify-center layout px-0">
+                        <v-icon
+                            small
+                            title="Editar"
+                            class="mr-2"
+                            @click="dialogEdit = true, activeItem = props.item.id"
+                        >
+                            edit
+                        </v-icon>
+                        <v-icon
+                            small
+                            title="Eliminar"
+                            @click="deleteItem(props.item.id)"
+                        >
+                            delete
+                        </v-icon>
+                        </td>
+ 
+                    </template>
                     <template v-slot:no-data>
                         <v-alert :value="true" color="error" icon="warning">
                             No tenemos datos disponibles :/
                         </v-alert>
                     </template>
                     </v-data-table>
+                    <!-- Dialog Edit -->
+                    <v-dialog v-model="dialogEdit" max-width="600px">
+                        <v-card>
+                            <v-card-title class="headline">Editar asistente {{ findAsistentes.datos }} </v-card-title>
+                            <v-card-text>
+                                <v-container grid-list-md>
+                                    <v-layout wrap>
+                                        <v-flex xs12 sm6 md6>
+                                            <v-text-field label="DNI" type="number" v-model="findAsistentes.dni"></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md6>
+                                            <v-text-field label="Nombres y apellidos" class="text-uppercase" type="text" v-model="findAsistentes.datos"></v-text-field>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md6>
+                                            <v-list>
+                                                <v-select
+                                                v-model="profesion"
+                                                :items="profesionesList">
+                                                </v-select>
+                                            </v-list>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md6>
+                                            <v-list>
+                                                <v-select
+                                                v-model="ciudad"
+                                                :items="ciudadList">
+                                                </v-select>
+                                            </v-list>
+                                        </v-flex>
+                                    </v-layout>
+                                </v-container>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn color="success" @click="updateAsist">Actualizar</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                 </v-card>
             </v-flex>
         </v-layout>            
@@ -73,6 +135,8 @@ export default {
             { text: 'Ciudad', value: 'ciudad' },
             { text: 'Estado', value: 'estado' }
         ],
+        dialogEdit: false,
+        activeItem: '',
         dni: '',
         datos: '',
         profesion: 'Ingeniería',
@@ -84,6 +148,11 @@ export default {
         },
         loading () {
             return this.$store.getters.getLoading
+        },
+        findAsistentes () {
+            return this.$store.getters.getAsist.find(data => {
+                return data.id == this.activeItem
+            }) || []
         }
     },
     methods: {
@@ -94,9 +163,19 @@ export default {
                 this.$store.dispatch('registerAsist', {
                     dni: this.dni,
                     datos: this.datos,
-                    profesion: this.profesion
-                })  
+                    profesion: this.profesion,
+                    ciudad: this.ciudad
+                })
+                this.datos = ""
+                this.dni = ""  
             }
+        },
+        deleteItem(id) {
+            this.$store.dispatch('deleteAsist', id)
+        },
+        updateAsist() {
+            this.dialogEdit = false
+            this.$store.dispatch('updateAsist', this.findAsistentes)
         }
     }
 }

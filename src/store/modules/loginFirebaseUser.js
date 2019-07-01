@@ -1,7 +1,13 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
-const state = {}
-const mutations = {}
+const state = {
+    user: ''
+}
+const mutations = {
+    setUser(state, payload) {
+        state.user = payload
+    }
+}
 const actions = {
     async loginFirebaseUser({commit}, payload) {
         const email = payload.user
@@ -14,6 +20,9 @@ const actions = {
                 data: e.message
             })
         })
+    },
+    autoSignIn({commit}, payload) {
+        commit('setUser', payload)
     }
 }
 const getters = {}
