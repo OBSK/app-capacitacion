@@ -1,17 +1,36 @@
 import Vue from 'vue'
+import firebase from 'firebase/app'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Login from './views/Login.vue'
+import Index from './views/Index.vue'
+import RegistrarAsist from './views/RegistrarAsist.vue'
+import RegistrarCap from './views/RegistrarCap.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router =  new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/index',
+      name: 'Home',
+      component: Index
+    },
+    {
+      path: '/registrarasistente',
+      name: 'RegistrarAsist',
+      component: RegistrarAsist
+    },
+    {
+      path: '/registrarcapacitacion',
+      name: 'RegistrarCapacitacion',
+      component: RegistrarCap
     },
     {
       path: '/about',
@@ -25,3 +44,12 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next) => {
+  const currentUser = firebase.auth().currentUser;
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  if (requiresAuth && !currentUser) next('Index')
+  else if (!requiresAuth && currentUser) next('Index')
+  else next()
+})
+
+export default router
