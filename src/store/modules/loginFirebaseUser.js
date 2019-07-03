@@ -1,5 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
+import router from '@/router'
 const state = {
     user: ''
 }
@@ -14,6 +15,8 @@ const actions = {
         const password = payload.password
         await firebase.auth().signInWithEmailAndPassword(email, password).then(res => {
             console.log("Inicio de sesion exitoso")
+            commit('setUser', res)
+            router.push('/')
         }).catch(e => {
             commit('setError', {
                 error: true,
@@ -23,7 +26,16 @@ const actions = {
     },
     autoSignIn({commit}, payload) {
         commit('setUser', payload)
+    },
+    userSignOut({commit}) {
+        firebase.auth().signOut()
+        commit('setUser', null)
+        router.push('/login')
     }
 }
-const getters = {}
+const getters = {
+    getUser (state) {
+        return state.user
+    }
+}
 export default {state, mutations, actions, getters}

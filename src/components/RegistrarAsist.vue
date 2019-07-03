@@ -14,7 +14,7 @@
                                          <v-text-field label="DNI" type="number" hint="8 caracteres" v-model="dni" max-length="8" min-length="8"></v-text-field>
                                     </v-flex>
                                     <v-flex xs12 sm6 md7>
-                                        <v-text-field label="Nombres y apellidos" type="text" v-model="datos"></v-text-field>
+                                        <v-text-field label="Nombres y apellidos" type="text" v-model="datos" :disabled="loading"></v-text-field>
                                     </v-flex>
                                     <v-flex xs12 sm6 md6>
                                         <v-list>
@@ -91,7 +91,7 @@
                                             <v-text-field label="DNI" type="number" v-model="findAsistentes.dni"></v-text-field>
                                         </v-flex>
                                         <v-flex xs12 sm6 md6>
-                                            <v-text-field label="Nombres y apellidos" class="text-uppercase" type="text" v-model="findAsistentes.datos"></v-text-field>
+                                            <v-text-field label="Nombres y apellidos" class="text-uppercase" type="text" v-model="findAsistentes.datos" ></v-text-field>
                                         </v-flex>
                                         <v-flex xs12 sm6 md6>
                                             <v-list>
@@ -114,7 +114,8 @@
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="success" @click="updateAsist">Actualizar</v-btn>
+                                <v-btn dark color="red" @click="dialogEdit = false" >Cancelar</v-btn>
+                                <v-btn dark color="success" @click="updateAsist" >Actualizar</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -124,6 +125,8 @@
     </v-container>
 </template>
 <script>
+import { watch } from 'fs';
+import axios from 'axios';
 export default {
     data: () => ({
         profesionesList: ['Ingeniería de Sistemas', 'Ingeniería', 'Derecho', 'Economía', 'Ingeniería Civil', 'Agronomía', 'Otros'],
@@ -176,6 +179,23 @@ export default {
         updateAsist() {
             this.dialogEdit = false
             this.$store.dispatch('updateAsist', this.findAsistentes)
+        }
+    },
+    watch: {
+        dni(value) {
+            if(value.length == 8) {
+                this.$store.dispatch('loading', true)
+                axios.post('https://immense-wave-82825.herokuapp.com/api/v1/dni', {
+                    dni: this.dni
+                }, {
+                    params: {
+                        token: 'abcxyz'
+                    }
+                }).then(res => {
+                    this.$store.dispatch('loading', false)
+                    this.datos = res.data[0].nombres + " " + res.data[0].apellidoPaterno + " " + res.data[0].apellidoMaterno
+                })
+            }
         }
     }
 }

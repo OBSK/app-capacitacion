@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import firebase from 'firebase/app'
 import 'firebase/auth'
-import config from './plugins/firebaseConfig'
+import config  from './plugins/firebaseConfig'
 import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
@@ -9,7 +9,6 @@ import store from './store'
 
 firebase.initializeApp(config);
 
-Vue.config.productionTip = false
 const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
   console.log("hola")
   new Vue({
@@ -22,7 +21,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
       if(firebaseUser) {
         store.dispatch('loadAsist')
       }
-    },
+    }
   })
   unsubscribe()
 })

@@ -1,55 +1,41 @@
 import Vue from 'vue'
 import firebase from 'firebase/app'
 import Router from 'vue-router'
-import Login from './views/Login.vue'
-import Index from './views/Index.vue'
-import RegistrarAsist from './views/RegistrarAsist.vue'
-import RegistrarCap from './views/RegistrarCap.vue'
+// import Login from './views/Login.vue'
+// import Index from './views/Index.vue'
+// import RegistrarAsist from './views/RegistrarAsist.vue'
+// import RegistrarCap from './views/RegistrarCap.vue'
+import ErrorPage from './components/ErrorPage'
+
+const routerOptions = [
+  { path: '/login', component: 'Login'},
+  { path: '/', component: 'Index', meta: { requiresAuth: true}},
+  { path: '/registrarasistente', component: 'RegistrarAsist', meta: { requiresAuth: true}},
+  { path: '/registrarcapacitacion', component: 'RegistrarCapacitacion', meta: { requiresAuth: true}}
+]
 
 Vue.use(Router)
+const routes = routerOptions.map(route => {
+  return {
+    path: route.path,
+    component: () => import(`./components/${route.component}.vue`),
+    meta: route.meta
+  }
+})
 
-const router =  new Router({
+const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
   routes: [
-    {
-      path: '/',
-      name: 'Login',
-      component: Login
-    },
-    {
-      path: '/index',
-      name: 'Home',
-      component: Index
-    },
-    {
-      path: '/registrarasistente',
-      name: 'RegistrarAsist',
-      component: RegistrarAsist
-    },
-    {
-      path: '/registrarcapacitacion',
-      name: 'RegistrarCapacitacion',
-      component: RegistrarCap
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: function () { 
-        return import(/* webpackChunkName: "about" */ './views/About.vue')
-      }
-    }
+    ...routes,
+    { path: '*', component: ErrorPage }
   ]
 })
-// router.beforeEach((to, from, next) => {
-//   const currentUser = firebase.auth().currentUser;
-//   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-//   if (requiresAuth && !currentUser) next('Index')
-//   else if (!requiresAuth && currentUser) next('Index')
-//   else next()
-// })
-
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const user = firebase.auth().currentUser
+  if(requiresAuth && !user) {
+    next('/login')
+  }
+  next()
+})
 export default router
