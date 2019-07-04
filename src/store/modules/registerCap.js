@@ -1,9 +1,10 @@
 import firebase from 'firebase/app'
 import 'firebase/database'
+import router from '@/router'
 const state = {
     capacitadores: [],
     capacitadoresArray: []
-}
+} 
 const mutations = {
     setCapacitador(state, payload) {
         state.capacitadores = payload
@@ -23,9 +24,24 @@ const mutations = {
 }
 const actions = {
     registerCapacitacion({commit}, payload) {
+        const capacitadores = payload.capacitadores
         const ref = firebase.database().ref('capacitacion/')
         ref.push({
-            
+            nombre: payload.nombre,
+            institucion: payload.institucion,
+            fecha: payload.fecha,
+            registro: firebase.database.ServerValue.TIMESTAMP,
+            horas: payload.horas,
+            creditos: payload.creditos,
+            ciudad: payload.ciudad
+        }).then(res => {
+            capacitadores.forEach(data => {
+                firebase.database().ref('capacitadores/' + res.key).push({
+                    datos: data.datos,
+                    id: data.id
+                })
+            })
+            router.push('/')        
         })
     },
     addCapacitador({commit}, payload) {

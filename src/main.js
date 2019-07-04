@@ -20,6 +20,8 @@ const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
       store.dispatch('autoSignIn', firebaseUser)
       if(firebaseUser) {
         store.dispatch('loadAsist')
+        store.dispatch('loadCapacitadores')
+        store.dispatch('loadCapacitaciones')
       }
     }
   })

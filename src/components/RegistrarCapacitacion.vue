@@ -126,7 +126,7 @@
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
                                     <v-btn dark color="red darken-1" @click="dialogConfirm = false">Cancelar</v-btn>
-                                    <v-btn dark color="green darken-1">Confirmar</v-btn>
+                                    <v-btn dark color="green darken-1" @click="registrarCap">Confirmar</v-btn>
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
@@ -228,7 +228,8 @@ export default {
                    creditos: this.creditos,
                    institucion: this.institucion,
                    ciudad: this.ciudad,
-                   fecha: this.fecha
+                   fecha: this.computedDateFormattedMomentjs,
+                   capacitadores: this.capacitadores
                })
            }
         },

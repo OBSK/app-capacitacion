@@ -63,7 +63,7 @@ const actions = {
             })
         } else {
             commit('setLoading', true)
-            firebase.database().ref('asistentes' + payload.id).update({
+            firebase.database().ref('asistentes/' + payload.id).update({
                 dni: payload.dni,
                 datos: payload.datos,
                 profesion: payload.profesion,
