@@ -33,12 +33,15 @@ const actions = {
             registro: firebase.database.ServerValue.TIMESTAMP,
             horas: payload.horas,
             creditos: payload.creditos,
-            ciudad: payload.ciudad
+            ciudad: payload.ciudad,
+            estado: true
         }).then(res => {
             capacitadores.forEach(data => {
                 firebase.database().ref('capacitadores/' + res.key).push({
                     datos: data.datos,
-                    id: data.id
+                    id: data.id,
+                    avatar: 'https://www.tattoofun.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/s/q/squirtle_sm.jpg',
+                    dni: data.dni
                 })
             })
             router.push('/')        

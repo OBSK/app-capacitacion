@@ -10,7 +10,7 @@ import store from './store'
 firebase.initializeApp(config);
 
 const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
-  console.log("hola")
+  console.log("ola q ase")
   new Vue({
     el: '#app',
     router,
@@ -19,9 +19,10 @@ const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
     created() {
       store.dispatch('autoSignIn', firebaseUser)
       if(firebaseUser) {
-        store.dispatch('loadAsist')
         store.dispatch('loadCapacitadores')
+        store.dispatch('loadAsist')
         store.dispatch('loadCapacitaciones')
+        store.dispatch('loadAsistentesCapacitacion')
       }
     }
   })

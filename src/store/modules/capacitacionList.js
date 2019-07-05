@@ -3,7 +3,8 @@ import 'firebase/database'
 import moment from 'moment'
 const state = {
     capacitadoresDatabase: [],
-    capacitacionesDatabase: []
+    capacitacionesDatabase: [],
+    asistentesCapacitacion: []
 }
 const mutations = {
     setCapacitacionesDatabase(state , payload) {
@@ -15,6 +16,12 @@ const mutations = {
     },
     setCapacitadoresDatabase(state , payload) {
         state.capacitadoresDatabase = payload
+    },
+    setAsistentesCapacitacion(state, payload) {
+        state.asistentesCapacitacion = payload
+    },
+    setAsistentesCapacitacionPush(state, payload) {
+        state.asistentesCapacitacion.push(payload)
     }
 }
 const actions = {
@@ -31,7 +38,8 @@ const actions = {
                     horas: capacitacion[key].horas,
                     institucion: capacitacion[key].institucion,
                     nombre: capacitacion[key].nombre,
-                    registro: capacitacion[key].registro
+                    registro: capacitacion[key].registro,
+                    estado: capacitacion[key].ciudad
                 })
                 commit('setCapacitacionesDatabase', capacitaciones)
             }
@@ -43,13 +51,8 @@ const actions = {
             const capacitadores = []
             for(let key in capacitador) {
                 capacitadores.push({
-                    ciudad: capacitador[key].ciudad,
-                    creditos: capacitador[key].creditos,
-                    fecha: capacitador[key].fecha,
-                    horas: capacitador[key].horas,
-                    institucion: capacitador[key].institucion,
-                    nombre: capacitador[key].nombre,
-                    registro: capacitador[key].registro,
+                    id: key,
+                    datos: Object.values(capacitador[key])
                 })
                 commit('setCapacitadoresDatabase', capacitadores)
             }
@@ -69,6 +72,53 @@ const actions = {
             nombre: payload.nombre,
             registroupdate: firebase.database.ServerValue.TIMESTAMP
         }).then(res => { alert('Actualizado correctamente') })
+    },
+    loadAsistentesCapacitacion({commit}, payload) {
+        firebase.database().ref('asistentescapacitacion/').on('value', snapshot => {
+            const asistente = snapshot.val()
+            const asistentes = []
+            for(let key in asistente) {
+                const transformed = Object.entries(asistente[key]).map(([key, obj])=> {
+                    return Object.assign(obj, {idCap: key})
+                }) 
+                asistentes.push({
+                    id: key,
+                    datos: transformed
+                })
+                commit('setAsistentesCapacitacion', asistentes)
+            }
+        })
+    },
+    registrarAsistentesCapacitacion({commit}, payload) {
+        firebase.database().ref('asistentescapacitacion/' + payload.id).push({
+            id: payload.asistente.id,
+            dni: payload.asistente.dni,
+            datos: payload.asistente.datos,
+            registro: firebase.database.ServerValue.TIMESTAMP,
+            profesion: payload.asistente.profesion,
+            ciudad: payload.asistente.ciudad,
+            horascapacitadas: 0,
+            estado: false
+        })
+    },
+    addAsistentesCapacitacion({commit}, payload) {
+        const data = Object.assign({save: false}, payload)
+        commit('setAsistentesCapacitacionPush', data)
+    },
+    registrarHorasCapacitadas({commit}, payload) {
+        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.id + "/").update({
+            ciudad: payload.data.ciudad,
+            horascapacitadas: payload.totalhoras,
+            datos: payload.data.datos,
+            dni: payload.data.dni,
+            estado: payload.data.estado,
+            id: payload.data.id,
+            profesion: payload.data.profesion,
+            registro: payload.data.registro
+        }).then(res => {console.log("Actualizado con exito")})
+    },
+    deleteAsistente({commit}, payload) {
+        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.idCap).remove().then(res => console.log('Eliminado'))
     }
 }
 const getters = {
@@ -77,6 +127,9 @@ const getters = {
     },
     getCapacitadores(state) {
         return state.capacitadoresDatabase
+    },
+    getAsistentesCapacitacion(state) {
+        return state.asistentesCapacitacion
     }
 }
 

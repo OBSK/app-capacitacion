@@ -24,7 +24,15 @@
                      <td align="center"> {{ props.item.horas }} </td>
                      <td align="center"> {{ props.item.creditos }} </td>
                      <td>
-                       <v-icon small color="success" @click="dialogDetalle = true" title="Ver">zoom_in</v-icon>
+                       <v-btn round v-if="props.item.estado = true" color="success" small title="El curso se encuentra disponible">
+                         <v-icon>check</v-icon>
+                       </v-btn>
+                       <v-btn round v-else color="red" small title="El curso no se encuentra disponible">
+                         <v-icon>clear</v-icon>
+                       </v-btn>
+                     </td>
+                     <td>
+                       <v-icon small color="success" @click="dialogDetalle = true, activeItem = props.item.id" title="Ver">zoom_in</v-icon>
                        <v-icon small color="success" @click="dialogEdit = true, activeItem = props.item.id" title="Modificar">edit</v-icon>
                        <v-icon small color="red" @click="deleteCapacitacion(props.item.id)" title="Eliminar">delete</v-icon>
                      </td>
@@ -36,7 +44,7 @@
                    <!-- Dialog Editar Capacitacion -->
                    <v-dialog v-model="dialogEdit" max-width="600px">
                         <v-card>
-                            <v-card-title class="headline">Editar {{ itemsEditCapacitaciones.nombre}} </v-card-title>
+                            <v-card-title class="headline">Editar {{ itemsEditCapacitaciones.nombre }} </v-card-title>
                             <v-card-text>
                                 <v-container grid-list-md>
                                     <v-layout wrap>
@@ -105,23 +113,142 @@
                     hide-overlay
                     transition="dialog-bottom-transition"
                     >
-                    <v-card-title>
-                      <v-toolbar card dark color="primary">
-                        <v-btn icon dark @click="dialogDetalle = false">
-                          <v-icon>close</v-icon>
-                        </v-btn>
-                        <v-toolbar-title>Detalle de la capacitación</v-toolbar-title>
-                      </v-toolbar>
-                      <v-container grid-list-md>
-                        <v-layout wrap>
-                          <v-list>
-                            <v-subheader>
-                              Capacitadores inscritos
-                            </v-subheader>
-                          </v-list>
-                        </v-layout>
-                      </v-container>
-                    </v-card-title>
+                    <v-card>
+                        <v-toolbar card dark color="primary">
+                          <v-btn icon dark @click="dialogDetalle = false">
+                            <v-icon>close</v-icon>
+                          </v-btn>
+                          <v-toolbar-title>Detalle de {{ itemsEditCapacitaciones.nombre }}</v-toolbar-title>
+                        </v-toolbar>
+                        <v-card>
+                          <v-card-title class="title"> Capacitadores:</v-card-title>
+                          <v-card-text>
+                            <v-data-table
+                            :items="itemsCapacitadores.datos"
+                            hide-headers
+                            hide-actions>
+                            <template v-slot:items="props">
+                              <td> {{ props.index + 1}} </td>
+                              <td>
+                                <v-avatar size="38px">
+                                  <img v-if="props.item.avatar != undefined" :src="props.item.avatar">
+                                  <v-icon v-else>people</v-icon>
+                                </v-avatar>
+                              </td>
+                              <td> {{ props.item.datos }} </td>
+                              <td>
+                                <v-btn small color="success">Ver</v-btn>
+                              </td>
+                            </template>
+                            </v-data-table>
+                            <v-spacer></v-spacer>
+                            <div size="300px">
+                              <v-toolbar flat color="white" >
+                                <v-toolbar-title>Personal a capacitar </v-toolbar-title>
+                                <v-divider
+                                  class="mx-2"
+                                  inset
+                                  vertical
+                                ></v-divider>
+                                <v-btn color="success" @click="dialogCap = true">
+                                  Nuevo
+                                </v-btn>
+                                <!-- Seleccionar personal a capacitarse -->
+                                <!-- Modal capacitador -->
+                                <v-dialog v-model="dialogCap" max-width="800px">
+                                    <v-card>
+                                        <v-card-title class="headline">Buscar Asistente
+                                            <v-spacer></v-spacer>
+                                        <v-text-field append-icon="search" label="Buscar" single-line hide-details v-model="searchCapacitador2"></v-text-field>
+                                        </v-card-title>
+                                        <v-card-text>
+                                            <v-container grid-list-md>
+                                                <v-layout wrap>
+                                                    <v-flex xs12 sm12 md12>
+                                                        <v-data-table
+                                                        :headers= "headers2"
+                                                        :items = "asistentes"
+                                                        :search = "searchCapacitador2">
+                                                        <template v-slot:items="props">
+                                                            <td> {{ props.item.dni }} </td>
+                                                            <td class="text-uppercase"> {{ props.item.datos }} </td>
+                                                            <td> {{ props.item.profesion }} </td>
+                                                            <td> {{ props.item.ciudad }} </td>
+                                                            <td>
+                                                                <v-btn small color="success" @click="agregarItem(props.item)"> Agregar </v-btn>
+                                                            </td>
+                                                        </template>
+                                                        <template v-slot:no-data>
+                                                                No tenemos registrado ningún capacitador aún.
+                                                        </template>
+                                                        <template v-slot:no-results>
+                                                            <v-alert :value="true" color="error" icon="warning">
+                                                                La búsqueda para {{ searchCapacitador2 }} no obtuvo resultados
+                                                            </v-alert>
+                                                        </template>
+                                                        </v-data-table>
+                                                    </v-flex>
+                                                </v-layout>
+                                            </v-container>
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="red" dark small @click="dialogCap = false"> Cerrar</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                              </v-toolbar>
+                              <v-data-table
+                              :headers="headers"
+                              :items="capacitados.datos">
+                                <template v-slot:items="props">
+                                  <td> {{ props.item.dni }} </td>
+                                  <td> {{ props.item.datos }} </td>
+                                  <td> {{ props.item.profesion }} </td>
+                                  <td> {{ props.item.ciudad }} </td>
+                                  <td  title="Cantidad de horas capacitadas" >  {{ props.item.horascapacitadas }}</td>
+                                  <td>
+                                    <v-dialog v-model="dialogRegistrarCapacitacion" max-width="640px">
+                                      <v-card>
+                                        <v-card-title class="title">Registrar capacitación de {{ props.item.datos }}</v-card-title>
+                                        <v-card-text>
+                                          <h3>Cantidad de horas totales: {{ itemsEditCapacitaciones.horas }} </h3>
+                                          <h3>Cantidad de horas recibidas: {{ props.item.horascapacitadas }} </h3>
+                                          <v-text-field label="Ingrese cantidad de horas de capacitación" type="number" v-model="horastotales"></v-text-field>
+                                          <h3>Cantidad de horas restantes: {{ Number(itemsEditCapacitaciones.horas) - Number(props.item.horascapacitadas) - Number(horastotales) }} </h3>
+                                        </v-card-text>
+                                        <v-card-actions>
+                                          <v-spacer></v-spacer>
+                                          <v-btn @click="registrarHorasCapacitadas(props.item)" color="primary">Registrar Capacitación </v-btn>
+                                        </v-card-actions>
+                                      </v-card>
+                                      
+                                    </v-dialog>
+                                    <v-btn dark v-if="Number(props.item.horascapacitadas) < Number(itemsEditCapacitaciones.horas)" small color="red" @click="dialogRegistrarCapacitacion = true">En curso</v-btn>
+                                    <v-btn dark v-else color="success" small>Capacitado</v-btn>
+                                  </td>
+                                  <td>
+                                    <v-icon color="red" small @click="deleteAsistente(props.item)" title="Eliminar asistente">delete</v-icon>
+                                  </td>
+                                </template>
+                                <template v-slot:no-data>
+                                  <h3>No tenemos personas a capacitarse aquí</h3>
+                                </template>
+                              </v-data-table>
+                            </div>
+                          </v-card-text>
+                        </v-card>
+                        <!-- <v-card>
+                          <v-list two-line>
+                          <v-subheader> Capacitadores: </v-subheader>
+                          <v-divider></v-divider>
+                          <v-list-tile-avatar>
+                            <img src="itemsCapacitadores.datos.avatar">
+                          </v-list-tile-avatar>
+                          <p> {{ itemsCapacitadores.datos[0].nombre }} </p>
+                        </v-list>
+                        </v-card> -->
+                    </v-card>
                     </v-dialog>
                  </v-layout>
                </v-container>
@@ -147,13 +274,35 @@ export default {
         {text: 'Fecha', value: 'fecha'},
         {text: 'Cantidad de horas', value: 'horas'},
         {text: 'Cantidad de créditos', value: 'creditos'},
+        {text: 'Estado', value: 'estado'},
         {text: 'Opciones', value: ''}
+      ],
+      headers: [
+        { text: 'DNI', value: 'dni' },
+        { text: 'Nombres y apellidos', value: 'datos' },
+        { text: 'Profesión', value: 'profesion' },
+        { text: 'Ciudad', value: 'ciudad' },
+        { text: 'Horas Cap', value: 'horascap' },
+        { text: 'Estado', value: 'estado' },
+        { text: 'Opciones', value: '' }
+      ],
+      headers2: [
+        { text: 'DNI', value: 'dni' },
+        { text: 'Nombres y apellidos', value: 'datos' },
+        { text: 'Profesión', value: 'profesion' },
+        { text: 'Ciudad', value: 'ciudad' },
+        { text: 'Opciones', value: '' }
       ],
       searchCapacitacion: '',
       dialogEdit: false,
       dialogDetalle: false,
+      dialogCap: false,
+      dialogRegistrarCapacitacion: false,
       activeItem: '',
-      menu: false
+      activeItem2: '',
+      searchCapacitador2: '',
+      menu: false,
+      horastotales: ''
     }),
     computed: {
       itemsCapacitaciones () {
@@ -163,12 +312,17 @@ export default {
         return this.$store.getters.getCapacitacion.find(data => {
           if(data.id == this.activeItem) {
             return data
-          } else {
-            return {
-              fecha: moment()
-            }
           }
         }) || []
+      },
+      itemsCapacitadores () {
+        return this.$store.getters.getCapacitadores.find(data => { return data.id == this.activeItem }) || []
+      },
+      asistentes () {
+        return this.$store.getters.getAsist
+      },
+      capacitados () {
+        return this.$store.getters.getAsistentesCapacitacion.find(data => { return data.id == this.activeItem }) || []
       },
       institucionList () {
         return this.$store.getters.getInstituciones
@@ -178,7 +332,10 @@ export default {
       },
       computedDateFormattedMomentjs () {
             return this.itemsEditCapacitaciones.fecha ? moment(this.itemsEditCapacitaciones.fecha).format('DD/MM/YYYY') : ''
-        }
+      },
+      validar () {
+        return true
+      }
     },
     methods: {
       deleteCapacitacion(id) {
@@ -187,6 +344,40 @@ export default {
       updateCapacitacion(data) {
         this.dialogEdit = false
         this.$store.dispatch('updateCapacitacion', data)
+      },
+      agregarItem(asistente) {
+            this.dialogCap == false
+            const record = this.asistentes.find(data => {
+              this.capacitados.datos.forEach(el => {
+                console.log(el)
+                if(el.id == data.id) {
+                  console.log('El asistente ya se encuentra registrado')
+                } else {
+                  console.log('El asistente no se encuentra registrado')
+                }
+              })
+            })
+            // this.$store.dispatch('registrarAsistentesCapacitacion' , {
+            //   asistente: asistente,
+            //   id: this.itemsEditCapacitaciones.id
+            // })
+      },
+      eliminarCap(id) {
+            this.$store.dispatch('deleteAsistente', id)
+
+      },
+      registrarHorasCapacitadas(data) {
+        this.$store.dispatch('registrarHorasCapacitadas', {
+          idcapacitacion: this.activeItem,
+          data: data,
+          totalhoras: this.horastotales
+        })
+      },
+      deleteAsistente(data) {
+        this.$store.dispatch('deleteAsistente', {
+          idcapacitacion: this.activeItem,
+          data: data
+        })
       }
     }
 }

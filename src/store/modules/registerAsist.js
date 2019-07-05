@@ -24,7 +24,6 @@ const actions = {
             estado: false
         }).then(res => { 
             commit('setLoading', false)
-            console.log(res, ">>response")
         }).catch(e => {
             commit('setLoading', false)
             commit('setError', {
