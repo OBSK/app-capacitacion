@@ -43,7 +43,7 @@
       <v-footer>
         <v-card class="flex">
           <v-card-actions class="justify-center">
-            &copy;2019 — <strong>By Arturo</strong>
+            <a href="https://www.facebook.com/jorge.huimaruiz" target="_blank">&copy;2019 — <strong >By Arturo</strong></a>
           </v-card-actions>
         </v-card>
       </v-footer>
@@ -57,7 +57,8 @@ export default {
     menuItems: [
       { icon: 'home', title: 'Inicio', link: '/' },
       { icon: 'how_to_reg', title: 'Registrar asistente', link: '/registrarasistente' },
-      { icon: 'work', title: 'Registrar capacitación', link: '/registrarcapacitacion' }
+      { icon: 'work', title: 'Registrar capacitación', link: '/registrarcapacitacion' },
+      { icon: 'person', title: 'Registrar usuario', link: '/registrarusuario' }
     ]
   }),
   components: {

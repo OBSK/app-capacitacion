@@ -11,36 +11,36 @@
              <v-card-text>
                <v-container grid-list-md>
                  <v-layout wrap>
-                   <v-data-table
-                   :headers="headersCapacitaciones"
-                   :items="itemsCapacitaciones"
-                   :search="searchCapacitacion"
-                   >
-                   <template v-slot:items="props">
-                     <td> {{ props.item.nombre }} </td>
-                     <td> {{ props.item.institucion }} </td>
-                     <td> {{ props.item.ciudad }} </td>
-                     <td> {{ props.item.fecha }} </td>
-                     <td align="center"> {{ props.item.horas }} </td>
-                     <td align="center"> {{ props.item.creditos }} </td>
-                     <td>
-                       <v-btn round v-if="props.item.estado = true" color="success" small title="El curso se encuentra disponible">
-                         <v-icon>check</v-icon>
-                       </v-btn>
-                       <v-btn round v-else color="red" small title="El curso no se encuentra disponible">
-                         <v-icon>clear</v-icon>
-                       </v-btn>
-                     </td>
-                     <td>
-                       <v-icon small color="success" @click="dialogDetalle = true, activeItem = props.item.id" title="Ver">zoom_in</v-icon>
-                       <v-icon small color="success" @click="dialogEdit = true, activeItem = props.item.id" title="Modificar">edit</v-icon>
-                       <v-icon small color="red" @click="deleteCapacitacion(props.item.id)" title="Eliminar">delete</v-icon>
-                     </td>
-                   </template>
-                   <template v-slot:no-data>
-                     <h3>No tenemos registros disponibles</h3>
-                   </template>
-                   </v-data-table>
+                   <v-flex xs12 sm12 md12>
+                     <v-data-table
+                      :headers="headersCapacitaciones"
+                      :items="itemsCapacitaciones"
+                      :search="searchCapacitacion"
+                      >
+                      <template v-slot:items="props">
+                        <td> {{ props.item.nombre }} </td>
+                        <td> {{ props.item.institucion }} </td>
+                        <td> {{ props.item.ciudad }} </td>
+                        <td> {{ props.item.fecha }} </td>
+                        <td align="center"> {{ props.item.horas }} </td>
+                        <td align="center"> {{ props.item.creditos }} </td>
+                        <td>
+                            <v-icon round v-if="props.item.estado = true" color="success" small title="El curso se encuentra disponible">check</v-icon>
+                            <v-icon round v-else color="red" small title="El curso no se encuentra disponible">clear</v-icon>
+                        </td>
+                        <td align="center"> {{ props.item.establecimiento }} </td>
+                        <td align="center"> {{ props.item.ubigeo }} </td>
+                        <td>
+                          <v-icon small color="success" @click="dialogDetalle = true, activeItem = props.item.id" title="Ver">zoom_in</v-icon>
+                          <v-icon small color="success" @click="dialogEdit = true, activeItem = props.item.id" title="Modificar">edit</v-icon>
+                          <v-icon small color="red" @click="deleteCapacitacion(props.item.id)" title="Eliminar">delete</v-icon>
+                        </td>
+                      </template>
+                      <template v-slot:no-data>
+                        <h3>No tenemos registros disponibles</h3>
+                      </template>
+                      </v-data-table>
+                   </v-flex>
                    <!-- Dialog Editar Capacitacion -->
                    <v-dialog v-model="dialogEdit" max-width="600px">
                         <v-card>
@@ -272,9 +272,11 @@ export default {
         {text: 'Institución', value: 'nombre'},
         {text: 'Ciudad', value: 'ciudad'},
         {text: 'Fecha', value: 'fecha'},
-        {text: 'Cantidad de horas', value: 'horas'},
-        {text: 'Cantidad de créditos', value: 'creditos'},
+        {text: 'Horas', value: 'horas'},
+        {text: 'Créditos', value: 'creditos'},
         {text: 'Estado', value: 'estado'},
+        { text: 'Establecimiento', value: 'establecimiento'},
+        { text: 'Ubigeo', value: 'ubigeo'},
         {text: 'Opciones', value: ''}
       ],
       headers: [
@@ -348,7 +350,7 @@ export default {
       agregarItem(asistente) {
             this.dialogCap == false
             const record = this.asistentes.find(data => {
-              this.capacitados.datos.forEach(el => {
+              this.capacitados.forEach(el => {
                 console.log(el)
                 if(el.id == data.id) {
                   console.log('El asistente ya se encuentra registrado')
@@ -357,10 +359,10 @@ export default {
                 }
               })
             })
-            // this.$store.dispatch('registrarAsistentesCapacitacion' , {
-            //   asistente: asistente,
-            //   id: this.itemsEditCapacitaciones.id
-            // })
+            this.$store.dispatch('registrarAsistentesCapacitacion' , {
+              asistente: asistente,
+              id: this.itemsEditCapacitaciones.id
+            })
       },
       eliminarCap(id) {
             this.$store.dispatch('deleteAsistente', id)

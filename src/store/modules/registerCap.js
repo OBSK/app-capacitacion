@@ -24,8 +24,10 @@ const mutations = {
 }
 const actions = {
     registerCapacitacion({commit}, payload) {
+        console.log(payload)
         const capacitadores = payload.capacitadores
         const ref = firebase.database().ref('capacitacion/')
+        const ubigeo = payload.establecimiento.codDep + payload.establecimiento.codProv + payload.establecimiento.codDist
         ref.push({
             nombre: payload.nombre,
             institucion: payload.institucion,
@@ -34,7 +36,9 @@ const actions = {
             horas: payload.horas,
             creditos: payload.creditos,
             ciudad: payload.ciudad,
-            estado: true
+            estado: true,
+            establecimiento: payload.establecimiento.descripcion,
+            ubigeo: ubigeo
         }).then(res => {
             capacitadores.forEach(data => {
                 firebase.database().ref('capacitadores/' + res.key).push({

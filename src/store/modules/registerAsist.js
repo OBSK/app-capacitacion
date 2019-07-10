@@ -14,6 +14,7 @@ const actions = {
         const datos = payload.datos
         const profesion = payload.profesion
         const ciudad = payload.ciudad
+        const condicion = payload.condicion
         commit('setLoading', true)
         firebase.database().ref('asistentes/').push({
             dni: dni,
@@ -21,6 +22,8 @@ const actions = {
             registro: firebase.database.ServerValue.TIMESTAMP,
             profesion: profesion,
             ciudad: ciudad,
+            registradopor: payload.registro,
+            condicion: payload.condicion,
             estado: false
         }).then(res => { 
             commit('setLoading', false)
@@ -45,7 +48,9 @@ const actions = {
                     profesion: asistente[key].profesion,
                     registro: asistente[key].registro,
                     estado: asistente[key].estado,
-                    ciudad: asistente[key].ciudad
+                    ciudad: asistente[key].ciudad,
+                    registropor: asistente[key].registradopor,
+                    condicion: asistente[key].condicion
                 })
                 commit('setAsist', asistentesArray)
             }

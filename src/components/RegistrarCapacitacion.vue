@@ -25,6 +25,7 @@
                                         <v-list>
                                             <v-select
                                             label="Institución"
+                                            menu-props="auto"
                                             v-model="institucion"
                                             :items="institucionList">
                                             </v-select>
@@ -33,13 +34,14 @@
                                     <v-flex xs12 sm6 md6>
                                         <v-list>
                                             <v-select
-                                            label="Lugar"
+                                            label="Micro Red"
+                                            menu-props="auto"
                                             v-model="ciudad"
                                             :items="ciudadList">
                                             </v-select>
                                         </v-list>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md6>
+                                    <v-flex xs12 sm6 md4>
                                         <v-menu
                                         v-model="menu"
                                         :close-on-content-click="false"
@@ -60,8 +62,18 @@
                                             </v-date-picker>
                                         </v-menu>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md6>
-                                        <v-text-field label="Cantidad de créditos" type="number" v-model="creditos" required></v-text-field>
+                                    <v-flex xs12 sm6 md3>
+                                        <v-text-field label="Créditos" type="number" v-model="creditos" required></v-text-field>
+                                    </v-flex>
+                                    <v-flex xs12 sm6 md5>
+                                        <v-select
+                                        label="Establecimiento"
+                                        menu-props="auto"
+                                        v-model="establecimiento.descripcion"
+                                        :items="establecimientoList"
+                                        item-text="descripcion">
+                                        </v-select>
+                                        
                                     </v-flex>
                                 </v-layout>
                             </v-container>
@@ -89,6 +101,7 @@
                                                     <td class="text-uppercase"> {{ props.item.datos }} </td>
                                                     <td> {{ props.item.profesion }} </td>
                                                     <td> {{ props.item.ciudad }} </td>
+                                                    <td> {{ props.item.condicion }} </td>
                                                     <td v-if="props.item.estado = true">
                                                         <v-btn small color="success" @click="agregarItem(props.item)"> Agregar </v-btn>
                                                     </td>
@@ -168,20 +181,20 @@ import moment from 'moment'
 export default {
     data: () => ({
         institucionList: ['Universidad César Vallejo', 'Universidad Nacional', 'UCP', 'UNI', 'UPEU', 'Otros'],
-        ciudadList: ['Tarapoto', 'Moyobamba', 'Juanjui', 'Bellavista', 'Chiclayo', 'Lima', 'Otros'],
         headers: [
             { text: 'DNI', value: 'dni' },
             { text: 'Nombres y apellidos', value: 'datos' },
             { text: 'Profesión', value: 'profesion' },
             { text: 'Ciudad', value: 'ciudad' },
-            { text: 'Estado', value: 'estado' }
+            { text: 'Estado', value: 'estado' },
+            { text: 'Opciones'}
         ],
         headersCap: [
             { text: 'DNI', value: 'dni' },
             { text: 'Nombres y apellidos', value: 'datos' },
             { text: 'Profesión', value: 'profesion' },
             { text: 'Ciudad', value: 'ciudad' },
-            { text: 'Estado', value: 'estado' }
+            { text: 'Opciones', value: 'estado'}
         ],
         menu: false,
         dialogCap: false,
@@ -193,7 +206,8 @@ export default {
         horas: '',
         nombre: '',
         institucion: 'Universidad César Vallejo',
-        ciudad: 'Tarapoto',
+        ciudad: 'TARAPOTO',
+        establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
         creditos: ''
     }),
     computed: {
@@ -215,6 +229,12 @@ export default {
             } else {
                 return false
             }
+        },
+        ciudadList () {
+            return this.$store.getters.getMicroRed
+        },
+        establecimientoList () {
+            return this.$store.getters.getEstablecimiento
         }
     },
     methods: {
@@ -229,7 +249,8 @@ export default {
                    institucion: this.institucion,
                    ciudad: this.ciudad,
                    fecha: this.computedDateFormattedMomentjs,
-                   capacitadores: this.capacitadores
+                   capacitadores: this.capacitadores,
+                   establecimiento: this.establecimiento
                })
            }
         },

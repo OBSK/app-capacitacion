@@ -32,6 +32,14 @@
                                             </v-select>
                                         </v-list>
                                     </v-flex>
+                                    <v-flex xs12 sm12 md12>
+                                            <v-select
+                                            v-model="condicion"
+                                            menu-props="auto"
+                                            :items="condicionList"
+                                            label="Condicion">
+                                            </v-select>
+                                        </v-flex>
                                 </v-layout>
                             </v-container>
                         </v-card-text>
@@ -55,6 +63,8 @@
                         <td> {{ props.item.datos }} </td>
                         <td> {{ props.item.profesion }} </td>
                         <td> {{ props.item.ciudad }} </td>
+                        <td title="Registrado por" style="color:green;"> {{ props.item.registropor }} </td>
+                        <td> {{ props.item.condicion }} </td>
                         <td class="justify-center layout px-0">
                         <v-icon
                             small
@@ -97,7 +107,9 @@
                                             <v-list>
                                                 <v-select
                                                 v-model="profesion"
-                                                :items="profesionesList">
+                                                menu-props="auto"
+                                                :items="profesionesList"
+                                                label="Profesion">
                                                 </v-select>
                                             </v-list>
                                         </v-flex>
@@ -105,7 +117,10 @@
                                             <v-list>
                                                 <v-select
                                                 v-model="ciudad"
-                                                :items="ciudadList">
+                                                menu-props="auto"
+                                                :items="ciudadList"
+                                                label="Profesion"
+                                                >
                                                 </v-select>
                                             </v-list>
                                         </v-flex>
@@ -129,21 +144,22 @@ import { watch } from 'fs';
 import axios from 'axios';
 export default {
     data: () => ({
-        profesionesList: ['Ingeniería de Sistemas', 'Ingeniería', 'Derecho', 'Economía', 'Ingeniería Civil', 'Agronomía', 'Otros'],
-        ciudadList: ['Tarapoto', 'Moyobamba', 'Juanjui', 'Bellavista', 'Chiclayo', 'Lima', 'Otros'],
         headers: [
             { text: 'DNI', value: 'dni' },
             { text: 'Nombres y apellidos', value: 'datos' },
             { text: 'Profesión', value: 'profesion' },
             { text: 'Ciudad', value: 'ciudad' },
+            { text: 'Registro', value: 'registropor' },
+            { text: 'Condicion', value: 'condicion'},
             { text: 'Estado', value: 'estado' }
         ],
         dialogEdit: false,
         activeItem: '',
         dni: '',
         datos: '',
-        profesion: 'Ingeniería',
-        ciudad: 'Tarapoto'
+        profesion: 'MEDICO GENERAL',
+        ciudad: 'TARAPOTO',
+        condicion: 'ALUMNO'
     }),
     computed: {
         asistentes () {
@@ -156,6 +172,18 @@ export default {
             return this.$store.getters.getAsist.find(data => {
                 return data.id == this.activeItem
             }) || []
+        },
+        userActive () {
+            return this.$store.getters.getUser.email
+        },
+        profesionesList() {
+            return this.$store.getters.getProfesionesList
+        },
+        ciudadList () {
+            return this.$store.getters.getMicroRed
+        },
+        condicionList () {
+            return this.$store.getters.getCondicion
         }
     },
     methods: {
@@ -167,7 +195,9 @@ export default {
                     dni: this.dni,
                     datos: this.datos,
                     profesion: this.profesion,
-                    ciudad: this.ciudad
+                    ciudad: this.ciudad,
+                    registro: this.userActive,
+                    condicion: this.condicion
                 })
                 this.datos = ""
                 this.dni = ""  

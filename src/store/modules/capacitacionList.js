@@ -39,7 +39,9 @@ const actions = {
                     institucion: capacitacion[key].institucion,
                     nombre: capacitacion[key].nombre,
                     registro: capacitacion[key].registro,
-                    estado: capacitacion[key].ciudad
+                    estado: capacitacion[key].ciudad,
+                    establecimiento: capacitacion[key].establecimiento,
+                    ubigeo: capacitacion[key].ubigeo
                 })
                 commit('setCapacitacionesDatabase', capacitaciones)
             }
@@ -106,7 +108,8 @@ const actions = {
         commit('setAsistentesCapacitacionPush', data)
     },
     registrarHorasCapacitadas({commit}, payload) {
-        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.id + "/").update({
+        console.log(payload)
+        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.idCap + "/").update({
             ciudad: payload.data.ciudad,
             horascapacitadas: payload.totalhoras,
             datos: payload.data.datos,

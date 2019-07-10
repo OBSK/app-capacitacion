@@ -11,7 +11,8 @@ const routerOptions = [
   { path: '/login', component: 'Login'},
   { path: '/', component: 'Index', meta: { requiresAuth: true}},
   { path: '/registrarasistente', component: 'RegistrarAsist', meta: { requiresAuth: true}},
-  { path: '/registrarcapacitacion', component: 'RegistrarCapacitacion', meta: { requiresAuth: true}}
+  { path: '/registrarcapacitacion', component: 'RegistrarCapacitacion', meta: { requiresAuth: true}},
+  { path: '/registrarusuario', component: 'RegistrarUsuario', meta: { requiresAuth: true}}
 ]
 
 Vue.use(Router)

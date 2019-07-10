@@ -23,6 +23,7 @@ const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
         store.dispatch('loadAsist')
         store.dispatch('loadCapacitaciones')
         store.dispatch('loadAsistentesCapacitacion')
+        store.dispatch('loadUsuarios')
       }
     }
   })
