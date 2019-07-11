@@ -4,7 +4,8 @@
          <v-flex x12 sm12 md12>
            <v-card flat>
              <v-card-title class="headline">
-               Lista de capacitaciones
+               Lista de capacitaciones   
+               <v-btn @click="exportExcel" color="success" dark>Exportar a excel</v-btn>            
                <v-spacer></v-spacer>
                <v-text-field append-icon="search" label="Buscar capacitación" v-model="searchCapacitacion" ></v-text-field>
              </v-card-title>
@@ -118,7 +119,7 @@
                           <v-btn icon dark @click="dialogDetalle = false">
                             <v-icon>close</v-icon>
                           </v-btn>
-                          <v-toolbar-title>Detalle de {{ itemsEditCapacitaciones.nombre }}</v-toolbar-title>
+                          <v-toolbar-title>Detalle de {{ itemsEditCapacitaciones.nombre }} </v-toolbar-title>
                         </v-toolbar>
                         <v-card>
                           <v-card-title class="title"> Capacitadores:</v-card-title>
@@ -137,10 +138,33 @@
                               </td>
                               <td> {{ props.item.datos }} </td>
                               <td>
-                                <v-btn small color="success">Ver</v-btn>
+                                <v-btn small color="success" @click="dialogCapacitador = true; capacitadorSearch = props.item.id">Ver</v-btn>
                               </td>
                             </template>
                             </v-data-table>
+                            <!-- Vista Capacitador -->
+                            <v-dialog v-model="dialogCapacitador" max-width="600px">
+                              <v-card>
+                                <v-card-title class="title"> Capacitador {{ itemsViewsCapacitador.datos }} </v-card-title>
+                                <v-card-text>
+                                  <v-flex xs12 sm12 md12>
+                                    <h3>DNI: {{ itemsViewsCapacitador.dni }} </h3>
+                                  </v-flex>
+                                  <v-flex xs12 sm12 md12>
+                                    <h3>Profesion: {{ itemsViewsCapacitador.profesion }} </h3>
+                                  </v-flex>
+                                  <v-flex xs12 sm12 md12>
+                                    <h3>Registrado {{ moment(itemsViewsCapacitador.registro).lang('es').fromNow()  }} </h3>
+                                  </v-flex>
+                                  <v-flex xs12 sm12 md12>
+                                    <h3>Ciudad {{ itemsViewsCapacitador.ciudad  }} </h3>
+                                  </v-flex>
+                                  <v-flex xs12 sm12 md12>
+                                    <h3>Estado: <v-icon color="green" title="Habilitado">check</v-icon> </h3>
+                                  </v-flex>
+                                </v-card-text>
+                              </v-card>
+                            </v-dialog>
                             <v-spacer></v-spacer>
                             <div size="300px">
                               <v-toolbar flat color="white" >
@@ -208,28 +232,27 @@
                                   <td> {{ props.item.ciudad }} </td>
                                   <td  title="Cantidad de horas capacitadas" >  {{ props.item.horascapacitadas }}</td>
                                   <td>
-                                    <v-dialog v-model="dialogRegistrarCapacitacion" max-width="640px">
-                                      <v-card>
-                                        <v-card-title class="title">Registrar capacitación de {{ props.item.datos }}</v-card-title>
+                                    <v-btn dark v-if="Number(props.item.horascapacitadas) < Number(itemsEditCapacitaciones.horas)" small color="red" @click="dialogRegistrarCapacitacion = true; activeItemEdit = props.item">En curso</v-btn>
+                                    <v-btn dark v-else color="success" small>Capacitado</v-btn>
+                                  </td>
+                                  <td>
+                                    <v-icon color="red" small @click="deleteAsistente(props.item)" title="Eliminar asistente">delete</v-icon>
+                                  </td>
+                                  <v-dialog v-model="dialogRegistrarCapacitacion" max-width="640px">
+                                    <v-card>
+                                      <v-card-title class="title">Registrar capacitación de {{ activeItemEdit.datos }}</v-card-title>
                                         <v-card-text>
                                           <h3>Cantidad de horas totales: {{ itemsEditCapacitaciones.horas }} </h3>
-                                          <h3>Cantidad de horas recibidas: {{ props.item.horascapacitadas }} </h3>
+                                          <h3>Cantidad de horas recibidas: {{ activeItemEdit.horascapacitadas }} </h3>
                                           <v-text-field label="Ingrese cantidad de horas de capacitación" type="number" v-model="horastotales"></v-text-field>
-                                          <h3>Cantidad de horas restantes: {{ Number(itemsEditCapacitaciones.horas) - Number(props.item.horascapacitadas) - Number(horastotales) }} </h3>
+                                          <h3>Cantidad de horas restantes: {{ Number(itemsEditCapacitaciones.horas) - Number(activeItemEdit.horascapacitadas) - Number(horastotales) }} </h3>
                                         </v-card-text>
                                         <v-card-actions>
                                           <v-spacer></v-spacer>
                                           <v-btn @click="registrarHorasCapacitadas(props.item)" color="primary">Registrar Capacitación </v-btn>
                                         </v-card-actions>
                                       </v-card>
-                                      
-                                    </v-dialog>
-                                    <v-btn dark v-if="Number(props.item.horascapacitadas) < Number(itemsEditCapacitaciones.horas)" small color="red" @click="dialogRegistrarCapacitacion = true">En curso</v-btn>
-                                    <v-btn dark v-else color="success" small>Capacitado</v-btn>
-                                  </td>
-                                  <td>
-                                    <v-icon color="red" small @click="deleteAsistente(props.item)" title="Eliminar asistente">delete</v-icon>
-                                  </td>
+                                  </v-dialog>
                                 </template>
                                 <template v-slot:no-data>
                                   <h3>No tenemos personas a capacitarse aquí</h3>
@@ -260,10 +283,12 @@
 </template>
 <script>
 import moment from 'moment'
+import XLSX from 'xlsx'
 export default {
     data: () => ({
       email: '',
       password: '',
+      moment: moment,
       myStyle: {
         backgroundColor: '#607D8B'
       },
@@ -304,11 +329,21 @@ export default {
       activeItem2: '',
       searchCapacitador2: '',
       menu: false,
-      horastotales: ''
+      horastotales: '',
+      activeItemEdit: '',
+      dialogCapacitador: false,
+      capacitadorSearch: ''
     }),
     computed: {
       itemsCapacitaciones () {
         return this.$store.getters.getCapacitacion
+      },
+      itemsViewsCapacitador () {
+        return this.$store.getters.getAsist.find(data => {
+          if(data.id == this.capacitadorSearch) {
+            return data
+          }
+        }) || []
       },
       itemsEditCapacitaciones () {
         return this.$store.getters.getCapacitacion.find(data => {
@@ -325,6 +360,17 @@ export default {
       },
       capacitados () {
         return this.$store.getters.getAsistentesCapacitacion.find(data => { return data.id == this.activeItem }) || []
+      },
+      asistentesEdit() {
+        return this.$store.getters.getAsistentesCapacitacion.find(data => {
+          console.log(data.datos.idCap, this.activeItemEdit)
+          if(data.idCap == this.activeItemEdit) {
+            return data
+          }     
+        }) || []
+      },
+      capacitadosToExcel () {
+        return this.$store.getters.getAsist
       },
       institucionList () {
         return this.$store.getters.getInstituciones
@@ -349,19 +395,20 @@ export default {
       },
       agregarItem(asistente) {
             this.dialogCap == false
-            const record = this.asistentes.find(data => {
-              this.capacitados.forEach(el => {
-                console.log(el)
-                if(el.id == data.id) {
-                  console.log('El asistente ya se encuentra registrado')
-                } else {
-                  console.log('El asistente no se encuentra registrado')
-                }
-              })
-            })
+            // const record = this.asistentes.find(data => {
+            //   this.capacitados.forEach(el => {
+            //     console.log(el)
+            //     if(el.id == data.id) {
+            //       console.log('El asistente ya se encuentra registrado')
+            //     } else {
+            //       console.log('El asistente no se encuentra registrado')
+            //     }
+            //   })
+            // })
             this.$store.dispatch('registrarAsistentesCapacitacion' , {
               asistente: asistente,
-              id: this.itemsEditCapacitaciones.id
+              id: this.itemsEditCapacitaciones.id,
+              capacitacion: this.capacitados
             })
       },
       eliminarCap(id) {
@@ -371,7 +418,7 @@ export default {
       registrarHorasCapacitadas(data) {
         this.$store.dispatch('registrarHorasCapacitadas', {
           idcapacitacion: this.activeItem,
-          data: data,
+          data: this.activeItemEdit,
           totalhoras: this.horastotales
         })
       },
@@ -380,6 +427,13 @@ export default {
           idcapacitacion: this.activeItem,
           data: data
         })
+      },
+      exportExcel () {
+        let data = XLSX.utils.json_to_sheet(this.capacitadosToExcel)
+        const workbook = XLSX.utils.book_new()
+        const filename = 'Reporte al ' + moment().format('DD-MM-YYYY') 
+        XLSX.utils.book_append_sheet(workbook, data, filename)
+        XLSX.writeFile(workbook, `${filename}.xlsx`)
       }
     }
 }

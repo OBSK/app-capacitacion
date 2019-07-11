@@ -41,7 +41,8 @@ const actions = {
                     registro: capacitacion[key].registro,
                     estado: capacitacion[key].ciudad,
                     establecimiento: capacitacion[key].establecimiento,
-                    ubigeo: capacitacion[key].ubigeo
+                    ubigeo: capacitacion[key].ubigeo,
+                    direccion: capacitacion[key].direccion
                 })
                 commit('setCapacitacionesDatabase', capacitaciones)
             }
@@ -92,6 +93,7 @@ const actions = {
         })
     },
     registrarAsistentesCapacitacion({commit}, payload) {
+        console.log(payload)
         firebase.database().ref('asistentescapacitacion/' + payload.id).push({
             id: payload.asistente.id,
             dni: payload.asistente.dni,
@@ -100,7 +102,14 @@ const actions = {
             profesion: payload.asistente.profesion,
             ciudad: payload.asistente.ciudad,
             horascapacitadas: 0,
-            estado: false
+            estado: false,
+            nombrecapacitacion: payload.capacitacion.nombre,
+            lugar: payload.capacitacion.direccion,
+            fecha: payload.capacitacion.fecha,
+            institucion: payload.capacitacion.institucion,
+            horas: payload.capacitacion.horas,
+            ubigeo: payload.capacitacion.ubigeo,
+            establecimiento: payload.capacitacion.establecimiento
         })
     },
     addAsistentesCapacitacion({commit}, payload) {
@@ -108,10 +117,10 @@ const actions = {
         commit('setAsistentesCapacitacionPush', data)
     },
     registrarHorasCapacitadas({commit}, payload) {
-        console.log(payload)
+        const horastotales = Number(payload.data.horascapacitadas) + Number(payload.totalhoras)
         firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.idCap + "/").update({
             ciudad: payload.data.ciudad,
-            horascapacitadas: payload.totalhoras,
+            horascapacitadas: horastotales,
             datos: payload.data.datos,
             dni: payload.data.dni,
             estado: payload.data.estado,

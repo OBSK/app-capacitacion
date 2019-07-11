@@ -21,6 +21,9 @@
                                     <v-flex xs12 sm6 md7>
                                         <v-text-field label="Nombre de la capacitación" type="text" v-model="nombre"></v-text-field>
                                     </v-flex>
+                                    <v-flex xs12 sm12 md12>
+                                        <v-text-field label="Lugar de la capacitación" type="text" v-model="direccion"></v-text-field>
+                                    </v-flex>
                                     <v-flex xs12 sm6 md6>
                                         <v-list>
                                             <v-select
@@ -103,10 +106,11 @@
                                                     <td> {{ props.item.ciudad }} </td>
                                                     <td> {{ props.item.condicion }} </td>
                                                     <td v-if="props.item.estado = true">
-                                                        <v-btn small color="success" @click="agregarItem(props.item)"> Agregar </v-btn>
+                                                        <v-btn v-if="props.item.condicion == 'ALUMNO'" small color="orange" dark title="El personal solicitado es un alumno"><v-icon>warning</v-icon> </v-btn>
+                                                        <v-btn v-else small color="success" @click="agregarItem(props.item)" title="Click para agregar"> Agregar </v-btn>
                                                     </td>
                                                     <td v-else>
-                                                        <v-btn small color="red">En curso</v-btn>
+                                                        <v-btn small color="red" dark>En curso</v-btn>
                                                     </td>
                                                 </template>
                                                 <template v-slot:no-data>
@@ -208,7 +212,8 @@ export default {
         institucion: 'Universidad César Vallejo',
         ciudad: 'TARAPOTO',
         establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
-        creditos: ''
+        creditos: '',
+        direccion: ''
     }),
     computed: {
         asistentes () {
@@ -250,7 +255,8 @@ export default {
                    ciudad: this.ciudad,
                    fecha: this.computedDateFormattedMomentjs,
                    capacitadores: this.capacitadores,
-                   establecimiento: this.establecimiento
+                   establecimiento: this.establecimiento,
+                   direccion: this.direccion
                })
            }
         },

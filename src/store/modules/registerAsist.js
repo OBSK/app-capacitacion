@@ -23,7 +23,7 @@ const actions = {
             profesion: profesion,
             ciudad: ciudad,
             registradopor: payload.registro,
-            condicion: payload.condicion,
+            condicion: condicion,
             estado: false
         }).then(res => { 
             commit('setLoading', false)
