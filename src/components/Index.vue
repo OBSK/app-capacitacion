@@ -36,7 +36,7 @@
                         <td>
                           <v-icon small color="success" @click="dialogDetalle = true, activeItem = props.item.id" title="Ver">zoom_in</v-icon>
                           <v-icon small color="success" @click="dialogEdit = true, activeItem = props.item.id" title="Modificar">edit</v-icon>
-                          <v-icon small color="red" @click="deleteCapacitacion(props.item.id)" title="Eliminar">delete</v-icon>
+                          <v-icon small disabled color="red" @click="deleteCapacitacion(props.item.id)" title="Eliminar">delete</v-icon>
                         </td>
                       </template>
                       <template v-slot:no-data>
@@ -144,10 +144,22 @@
                               </td>
                             </template>
                             </v-data-table>
+                            <!-- Dialog Replica -->
+                            <v-dialog v-model="dialogFindReplica" max-width="640px">
+                                    <v-card>
+                                      <v-card-title class="title">Detalle de la replica</v-card-title>
+                                      <v-card-text>
+                                        <v-list>
+                                          <h3>Establecimiento:  {{ detalleFindReplica.datos[0].establecimiento }}</h3>
+                                          <h3>Fecha de registro:  {{ moment(detalleFindReplica.datos[0].registro).format('DD/MM/YYYY') }} {{ moment(detalleFindReplica.datos[0].registro).locale('es').fromNow()}} </h3>
+                                        </v-list>
+                                      </v-card-text>
+                                    </v-card>
+                            </v-dialog>
                             <!-- Vista Capacitador -->
                             <v-dialog v-model="dialogCapacitador" max-width="600px">
                               <v-card>
-                                <v-card-title class="title"> Capacitador {{ itemsViewsCapacitador.datos }} </v-card-title>
+                                <v-card-title class="title grey"> Capacitador {{ itemsViewsCapacitador.datos }} </v-card-title>
                                 <v-card-text>
                                   <v-flex xs12 sm12 md12>
                                     <h3>DNI: {{ itemsViewsCapacitador.dni }} </h3>
@@ -156,7 +168,7 @@
                                     <h3>Profesion: {{ itemsViewsCapacitador.profesion }} </h3>
                                   </v-flex>
                                   <v-flex xs12 sm12 md12>
-                                    <h3>Registrado {{ moment(itemsViewsCapacitador.registro).lang('es').fromNow()  }} </h3>
+                                    <h3>Registrado {{ moment(itemsViewsCapacitador.registro).lang('es').fromNow() }} </h3>
                                   </v-flex>
                                   <v-flex xs12 sm12 md12>
                                     <h3>Ciudad {{ itemsViewsCapacitador.ciudad  }} </h3>
@@ -238,8 +250,38 @@
                                     <v-btn dark v-else color="success" small>Capacitado</v-btn>
                                   </td>
                                   <td>
+                                    <v-btn small color="warning" v-if="Number(props.item.horascapacitadas) >= Number(itemsEditCapacitaciones.horas)" @click="dialogReplica = true; activeReplica = props.item" title="Registrar replica">Replica</v-btn>
+                                  </td>
+                                  <td>
+                                    <v-icon color="green" title="Ver replica" v-if="Number(props.item.horascapacitadas) >= Number(itemsEditCapacitaciones.horas)" small @click="dialogFindReplica = true; activeItemReplica = props.item"> zoom_in</v-icon>
                                     <v-icon color="red" small @click="deleteAsistente(props.item)" title="Eliminar asistente">delete</v-icon>
                                   </td>
+                                  <!-- Registrar replica -->
+                                  <v-dialog v-model="dialogReplica" max-width="640px" persistent>
+                                    <v-card>
+                                      <v-card-title class="headline">¿Estas seguro de registrar la replica?</v-card-title>
+                                      <v-card-text>
+                                        <h2>¿En que establecimiento realizó la replica?</h2>
+                                        <!-- <h2> {{ activeReplica }} </h2> -->
+                                        <v-flex xs12 sm6 md6>
+                                        <v-select
+                                              menu-props="auto"
+                                              v-model="establecimiento.descripcion"
+                                              :items="establecimientoList"
+                                              item-text="descripcion"
+                                              hint="Ingrese el establecimiento"
+                                              persistent-hint>
+                                        </v-select>
+                                        </v-flex>
+                                        <!-- <p> {{ activeReplica }} </p> -->
+                                      </v-card-text>
+                                      <v-card-actions>
+                                        <v-spacer></v-spacer>
+                                        <v-btn @click="dialogReplica = false" color="red darken-2" dark>Cancelar</v-btn>
+                                        <v-btn @click="updateReplica" color="green darken-2" dark>Guardar</v-btn>
+                                      </v-card-actions>
+                                    </v-card>
+                                  </v-dialog>
                                   <v-dialog v-model="dialogRegistrarCapacitacion" max-width="640px">
                                     <v-card>
                                       <v-card-title class="title">Registrar capacitación de {{ activeItemEdit.datos }}</v-card-title>
@@ -263,16 +305,6 @@
                             </div>
                           </v-card-text>
                         </v-card>
-                        <!-- <v-card>
-                          <v-list two-line>
-                          <v-subheader> Capacitadores: </v-subheader>
-                          <v-divider></v-divider>
-                          <v-list-tile-avatar>
-                            <img src="itemsCapacitadores.datos.avatar">
-                          </v-list-tile-avatar>
-                          <p> {{ itemsCapacitadores.datos[0].nombre }} </p>
-                        </v-list>
-                        </v-card> -->
                     </v-card>
                     </v-dialog>
                  </v-layout>
@@ -314,6 +346,7 @@ export default {
         { text: 'Ciudad', value: 'ciudad' },
         { text: 'Horas Cap', value: 'horascap' },
         { text: 'Estado', value: 'estado' },
+        { text: 'Replica', value: 'replica' },
         { text: 'Opciones', value: '' }
       ],
       headers2: [
@@ -335,7 +368,12 @@ export default {
       horastotales: '',
       activeItemEdit: '',
       dialogCapacitador: false,
-      capacitadorSearch: ''
+      dialogReplica: false,
+      dialogFindReplica: false,
+      activeReplica: '',
+      capacitadorSearch: '',
+      establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
+      activeItemReplica: ''
     }),
     computed: {
       itemsCapacitaciones () {
@@ -375,6 +413,9 @@ export default {
       capacitadosToExcel () {
         return this.$store.getters.getAsist
       },
+      detalleReplica  () {
+        return this.$store.getters.getReplica
+      },
       institucionList () {
         return this.$store.getters.getInstituciones
       },
@@ -382,10 +423,28 @@ export default {
         return this.$store.getters.getCiudadList
       },
       computedDateFormattedMomentjs () {
-            return this.itemsEditCapacitaciones.fecha ? moment(this.itemsEditCapacitaciones.fecha).format('DD/MM/YYYY') : ''
+        return this.itemsEditCapacitaciones.fecha ? moment(this.itemsEditCapacitaciones.fecha).format('DD/MM/YYYY') : ''
       },
       validar () {
         return true
+      },
+      establecimientoList () {
+          return this.$store.getters.getEstablecimiento
+      },
+      detalleFindReplica () {
+        return this.$store.getters.getReplica.find(data => {
+          if(data.id == this.itemsEditCapacitaciones.id) {
+            console.log(this.activeItemReplica)
+            console.log(data.datos[0].idAsist, this.activeItemReplica.idCap)
+            if(data.datos[0] != undefined) {
+                if(data.datos[0].idAsist == this.activeItemReplica.idCap) {
+                return data.datos[0]
+              }
+            }
+            else return { "id": "-LjT9HbPSM-MA2WjJdk6", "datos": [ { "establecimiento": "TARAPOTO", "idAsist": "-LjpyDHAs5_HB__G6w-d", "registro": 1563205774305, "idCap": "-LjqJmhMuyXTRN4N8B0N" } ] }
+            
+          }
+        }) || { "id": "-LjT9HbPSM-MA2WjJdk6", "datos": [ { "establecimiento": "lala", "idAsist": "", "registro": '', "idCap": "" } ] }
       }
     },
     methods: {
@@ -437,6 +496,14 @@ export default {
         const filename = 'Reporte al ' + moment().format('DD-MM-YYYY') 
         XLSX.utils.book_append_sheet(workbook, data, filename)
         XLSX.writeFile(workbook, `${filename}.xlsx`)
+      },
+      updateReplica () {
+        this.dialogReplica = false
+        this.$store.dispatch('updateReplica', {
+          capacitacion: this.itemsEditCapacitaciones,
+          replica: this.activeReplica,
+          establecimiento: this.establecimiento.descripcion
+        })
       }
     }
 }

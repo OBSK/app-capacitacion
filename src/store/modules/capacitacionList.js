@@ -4,7 +4,8 @@ import moment from 'moment'
 const state = {
     capacitadoresDatabase: [],
     capacitacionesDatabase: [],
-    asistentesCapacitacion: []
+    asistentesCapacitacion: [],
+    replica: []
 }
 const mutations = {
     setCapacitacionesDatabase(state , payload) {
@@ -22,6 +23,9 @@ const mutations = {
     },
     setAsistentesCapacitacionPush(state, payload) {
         state.asistentesCapacitacion.push(payload)
+    },
+    setReplica(state, payload) {
+        state.replica = payload
     }
 }
 const actions = {
@@ -93,8 +97,23 @@ const actions = {
             }
         })
     },
+    loadReplica({commit}, payload) {
+        firebase.database().ref('asistentesreplica/').on('value', snap => {
+            const replica = snap.val()
+            const replicas = []
+            for(let key in replica) {
+                const transformed = Object.entries(replica[key]).map(([key, obj])=> {
+                    return Object.assign(obj, {idCap: key})
+                }) 
+                replicas.push({
+                    id: key,
+                    datos: transformed
+            })
+            commit('setReplica', replicas)
+            }
+        })
+    },
     registrarAsistentesCapacitacion({commit}, payload) {
-        console.log(payload)
         firebase.database().ref('asistentescapacitacion/' + payload.id).push({
             id: payload.asistente.id,
             dni: payload.asistente.dni,
@@ -102,20 +121,30 @@ const actions = {
             registro: firebase.database.ServerValue.TIMESTAMP,
             profesion: payload.asistente.profesion,
             ciudad: payload.asistente.ciudad,
+            replica: 'No',
             horascapacitadas: 0,
             estado: false,
-            nombrecapacitacion: payload.capacitacion.nombre,
-            lugar: payload.capacitacion.direccion,
-            fecha: payload.capacitacion.fecha,
-            institucion: payload.capacitacion.institucion,
-            horas: payload.capacitacion.horas,
-            ubigeo: payload.capacitacion.ubigeo,
-            establecimiento: payload.capacitacion.establecimiento
+            // nombrecapacitacion: payload.capacitacion.nombre,
+            // lugar: payload.capacitacion.direccion,
+            // fecha: payload.capacitacion.fecha,
+            // institucion: payload.capacitacion.institucion,
+            // horas: payload.capacitacion.horas,
+            // ubigeo: payload.capacitacion.ubigeo,
+            // establecimiento: payload.capacitacion.establecimiento
         })
     },
     addAsistentesCapacitacion({commit}, payload) {
         const data = Object.assign({save: false}, payload)
         commit('setAsistentesCapacitacionPush', data)
+    },
+    updateReplica({commit}, payload) {
+        console.log(payload)
+        firebase.database().ref('asistentesreplica/' + payload.capacitacion.id).push({
+            idAsist: payload.replica.idCap,
+            registro: firebase.database.ServerValue.TIMESTAMP,
+            establecimiento: payload.establecimiento
+
+        }).then(res => console.log('Replica Registrada'))
     },
     registrarHorasCapacitadas({commit}, payload) {
         const horastotales = Number(payload.data.horascapacitadas) + Number(payload.totalhoras)
@@ -143,6 +172,9 @@ const getters = {
     },
     getAsistentesCapacitacion(state) {
         return state.asistentesCapacitacion
+    },
+    getReplica (state) {
+        return state.replica
     }
 }
 

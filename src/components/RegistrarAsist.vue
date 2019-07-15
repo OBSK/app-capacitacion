@@ -97,7 +97,6 @@
                         <v-icon
                             small
                             title="Eliminar"
-                            disabled
                             @click="deleteItem(props.item.id)"
                         >
                             delete

@@ -24,7 +24,8 @@ const actions = {
                 contrasena: payload.contrasena,
                 telefono: payload.telefono,
                 ciudad: payload.ciudad,
-                registro: firebase.database.ServerValue.TIMESTAMP
+                registro: firebase.database.ServerValue.TIMESTAMP,
+                rules: 'Administrador'
             })
         }).catch(e => {
             commit('setError', {
