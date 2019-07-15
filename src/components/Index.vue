@@ -19,6 +19,8 @@
                       :search="searchCapacitacion"
                       >
                       <template v-slot:items="props">
+                        <td v-if="props.item.numeroregistro"> {{ props.item.numeroregistro }} </td>
+                        <td v-else align="center"> --  </td>
                         <td> {{ props.item.nombre }} </td>
                         <td> {{ props.item.institucion }} </td>
                         <td> {{ props.item.ciudad }} </td>
@@ -293,6 +295,7 @@ export default {
         backgroundColor: '#607D8B'
       },
       headersCapacitaciones: [
+        {text: 'N° Registro', value: 'numeroregistro'},
         {text: 'Nombre de la capacitación', value: 'nombre'},
         {text: 'Institución', value: 'nombre'},
         {text: 'Ciudad', value: 'ciudad'},

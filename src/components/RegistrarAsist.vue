@@ -20,7 +20,9 @@
                                         <v-list>
                                             <v-select
                                             v-model="profesion"
-                                            :items="profesionesList">
+                                            :items="profesionesList"
+                                            hint="Profesion"
+                                            persistent-hint>
                                             </v-select>
                                         </v-list>
                                     </v-flex>
@@ -28,18 +30,29 @@
                                         <v-list>
                                             <v-select
                                             v-model="ciudad"
-                                            :items="ciudadList">
+                                            :items="ciudadList"
+                                            hint="Ciudad"
+                                            persistent-hint>
                                             </v-select>
                                         </v-list>
                                     </v-flex>
-                                    <v-flex xs12 sm12 md12>
+                                    <v-flex xs12 sm12 md6>
                                             <v-select
                                             v-model="condicion"
                                             menu-props="auto"
                                             :items="condicionList"
                                             label="Condicion">
                                             </v-select>
-                                        </v-flex>
+                                    </v-flex>
+                                    <v-flex xs12 sm6 md6>
+                                        <v-select
+                                        label="Establecimiento"
+                                        menu-props="auto"
+                                        v-model="establecimiento.descripcion"
+                                        :items="establecimientoList"
+                                        item-text="descripcion">
+                                        </v-select>
+                                    </v-flex>
                                 </v-layout>
                             </v-container>
                         </v-card-text>
@@ -54,16 +67,23 @@
             </v-flex>
             <v-flex xs12 sm6 md6>
                 <v-card flat>
-                    <v-card-title class="headline"> Lista de asistentes</v-card-title>
+                    <v-card-title class="headline"> Lista de asistentes
+                        <v-spacer></v-spacer>
+                    <v-text-field append-icon="search" label="Buscar" single-line hide-details v-model="search"></v-text-field>
+                    </v-card-title>
                     <v-data-table
                     :headers="headers"
-                    :items="asistentes">
+                    :items="asistentes"
+                    :search="search">
                     <template v-slot:items="props">
                         <td> {{ props.item.dni }} </td>
                         <td> {{ props.item.datos }} </td>
                         <td> {{ props.item.profesion }} </td>
                         <td> {{ props.item.ciudad }} </td>
+                        <td v-if="props.item.establecimiento" align="center"> {{ props.item.establecimiento }} </td>
+                        <td v-else align="center"> Sin registros </td>
                         <td title="Registrado por" style="color:green;"> {{ props.item.registropor }} </td>
+                        <td title="Fecha de registro"> {{ moment(props.item.registro).format('DD/MM/YYYY') }} {{ moment(props.item.registro).locale('es').fromNow()}} </td>
                         <td> {{ props.item.condicion }} </td>
                         <td class="justify-center layout px-0">
                         <v-icon
@@ -77,6 +97,7 @@
                         <v-icon
                             small
                             title="Eliminar"
+                            disabled
                             @click="deleteItem(props.item.id)"
                         >
                             delete
@@ -124,6 +145,23 @@
                                                 </v-select>
                                             </v-list>
                                         </v-flex>
+                                        <v-flex xs12 sm12 md6>
+                                            <v-select
+                                            v-model="condicion"
+                                            menu-props="auto"
+                                            :items="condicionList"
+                                            label="Condicion">
+                                            </v-select>
+                                        </v-flex>
+                                        <v-flex xs12 sm6 md6>
+                                            <v-select
+                                            label="Establecimiento"
+                                            menu-props="auto"
+                                            v-model="establecimiento.descripcion"
+                                            :items="establecimientoList"
+                                            item-text="descripcion">
+                                            </v-select>
+                                        </v-flex>
                                     </v-layout>
                                 </v-container>
                             </v-card-text>
@@ -142,6 +180,7 @@
 <script>
 import { watch } from 'fs';
 import axios from 'axios';
+import moment from 'moment';
 export default {
     data: () => ({
         headers: [
@@ -149,7 +188,9 @@ export default {
             { text: 'Nombres y apellidos', value: 'datos' },
             { text: 'Profesión', value: 'profesion' },
             { text: 'Ciudad', value: 'ciudad' },
+            { text: 'Establecimiento', value: 'establecimiento' },
             { text: 'Registro', value: 'registropor' },
+            { text: 'Fecha de registro', value: 'registro' },
             { text: 'Condicion', value: 'condicion'},
             { text: 'Estado', value: 'estado' }
         ],
@@ -159,7 +200,10 @@ export default {
         datos: '',
         profesion: 'MEDICO GENERAL',
         ciudad: 'TARAPOTO',
-        condicion: 'ALUMNO'
+        establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
+        condicion: 'ALUMNO',
+        moment: moment,
+        search: ''
     }),
     computed: {
         asistentes () {
@@ -184,6 +228,9 @@ export default {
         },
         condicionList () {
             return this.$store.getters.getCondicion
+        },
+        establecimientoList () {
+            return this.$store.getters.getEstablecimiento
         }
     },
     methods: {
@@ -197,7 +244,8 @@ export default {
                     profesion: this.profesion,
                     ciudad: this.ciudad,
                     registro: this.userActive,
-                    condicion: this.condicion
+                    condicion: this.condicion,
+                    establecimiento: this.establecimiento
                 })
                 this.datos = ""
                 this.dni = ""  

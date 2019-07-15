@@ -21,7 +21,10 @@
                                     <v-flex xs12 sm6 md7>
                                         <v-text-field label="Nombre de la capacitación" type="text" v-model="nombre"></v-text-field>
                                     </v-flex>
-                                    <v-flex xs12 sm12 md12>
+                                    <v-flex xs12 sm12 md6>
+                                        <v-text-field label="Registro N°" type="number" v-model="numeroregistro"></v-text-field>
+                                    </v-flex>
+                                    <v-flex xs12 sm12 md6>
                                         <v-text-field label="Lugar de la capacitación" type="text" v-model="direccion"></v-text-field>
                                     </v-flex>
                                     <v-flex xs12 sm6 md6>
@@ -105,8 +108,8 @@
                                                     <td> {{ props.item.profesion }} </td>
                                                     <td> {{ props.item.ciudad }} </td>
                                                     <td> {{ props.item.condicion }} </td>
-                                                    <td v-if="props.item.estado = true">
-                                                        <v-btn v-if="props.item.condicion == 'ALUMNO'" small color="orange" dark title="El personal solicitado es un alumno"><v-icon>warning</v-icon> </v-btn>
+                                                    <td v-if="props.item.estado = true" align="center">
+                                                        <v-icon v-if="props.item.condicion == 'ALUMNO'" color="orange" dark title="El personal solicitado es un alumno">warning</v-icon>
                                                         <v-btn v-else small color="success" @click="agregarItem(props.item)" title="Click para agregar"> Agregar </v-btn>
                                                     </td>
                                                     <td v-else>
@@ -213,7 +216,8 @@ export default {
         ciudad: 'TARAPOTO',
         establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
         creditos: '',
-        direccion: ''
+        direccion: '',
+        numeroregistro: ''
     }),
     computed: {
         asistentes () {
@@ -256,7 +260,8 @@ export default {
                    fecha: this.computedDateFormattedMomentjs,
                    capacitadores: this.capacitadores,
                    establecimiento: this.establecimiento,
-                   direccion: this.direccion
+                   direccion: this.direccion,
+                   numeroregistro: this.numeroregistro
                })
            }
         },

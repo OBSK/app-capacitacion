@@ -39,7 +39,8 @@ const actions = {
             estado: true,
             establecimiento: payload.establecimiento.descripcion,
             ubigeo: ubigeo,
-            direccion: payload.direccion
+            direccion: payload.direccion,
+            numeroregistro: payload.numeroregistro
         }).then(res => {
             capacitadores.forEach(data => {
                 firebase.database().ref('capacitadores/' + res.key).push({

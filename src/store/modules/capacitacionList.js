@@ -42,7 +42,8 @@ const actions = {
                     estado: capacitacion[key].ciudad,
                     establecimiento: capacitacion[key].establecimiento,
                     ubigeo: capacitacion[key].ubigeo,
-                    direccion: capacitacion[key].direccion
+                    direccion: capacitacion[key].direccion,
+                    numeroregistro: capacitacion[key].numeroregistro
                 })
                 commit('setCapacitacionesDatabase', capacitaciones)
             }
