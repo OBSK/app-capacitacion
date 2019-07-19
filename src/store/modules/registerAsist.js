@@ -22,7 +22,7 @@ const actions = {
             datos: datos,
             registro: firebase.database.ServerValue.TIMESTAMP,
             profesion: profesion,
-            ciudad: ciudad,
+            ciudad: ciudad.text,
             registradopor: payload.registro,
             condicion: condicion,
             ubigeo: ubigeo,

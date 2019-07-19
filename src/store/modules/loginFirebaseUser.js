@@ -31,6 +31,9 @@ const actions = {
         firebase.auth().signOut()
         commit('setUser', null)
         router.push('/login')
+    },
+    deleteUser({commit}, payload) {
+        // firebase.database().ref('usuarios/' + payload.id).remove()
     }
 }
 const getters = {

@@ -25,6 +25,8 @@
                         <td> {{ props.item.institucion }} </td>
                         <td> {{ props.item.ciudad }} </td>
                         <td> {{ props.item.fecha }} </td>
+                        <td v-if="props.item.fechatermino" align="center"> {{ props.item.fechatermino }} </td>
+                        <td v-else align="center"> -- </td>
                         <td align="center"> {{ props.item.horas }} </td>
                         <td align="center"> {{ props.item.creditos }} </td>
                         <td>
@@ -317,7 +319,9 @@
 </template>
 <script>
 import moment from 'moment'
+import _ from 'lodash'
 import XLSX from 'xlsx'
+import { async } from 'q';
 export default {
     data: () => ({
       email: '',
@@ -332,6 +336,7 @@ export default {
         {text: 'Institución', value: 'nombre'},
         {text: 'Ciudad', value: 'ciudad'},
         {text: 'Fecha', value: 'fecha'},
+        {text: 'Termino', value: 'fechatermino'},
         {text: 'Horas', value: 'horas'},
         {text: 'Créditos', value: 'creditos'},
         {text: 'Estado', value: 'estado'},
@@ -411,7 +416,7 @@ export default {
         }) || []
       },
       capacitadosToExcel () {
-        return this.$store.getters.getAsist
+        return this.$store.getters.getAsistentesCapacitacion
       },
       detalleReplica  () {
         return this.$store.getters.getReplica
@@ -434,8 +439,6 @@ export default {
       detalleFindReplica () {
         return this.$store.getters.getReplica.find(data => {
           if(data.id == this.itemsEditCapacitaciones.id) {
-            console.log(this.activeItemReplica)
-            console.log(data.datos[0].idAsist, this.activeItemReplica.idCap)
             if(data.datos[0] != undefined) {
                 if(data.datos[0].idAsist == this.activeItemReplica.idCap) {
                 return data.datos[0]
@@ -469,7 +472,7 @@ export default {
             // })
             this.$store.dispatch('registrarAsistentesCapacitacion' , {
               asistente: asistente,
-              id: this.itemsEditCapacitaciones.id,
+              id: this.itemsEditCapacitaciones,
               capacitacion: this.capacitados
             })
       },
@@ -491,7 +494,12 @@ export default {
         })
       },
       exportExcel () {
-        let data = XLSX.utils.json_to_sheet(this.capacitadosToExcel)
+        const array = []
+        const capacitados = this.capacitadosToExcel.forEach(data => {
+          array.push(data.datos)
+        })
+        console.log(array)
+        let data = XLSX.utils.json_to_sheet(array)
         const workbook = XLSX.utils.book_new()
         const filename = 'Reporte al ' + moment().format('DD-MM-YYYY') 
         XLSX.utils.book_append_sheet(workbook, data, filename)

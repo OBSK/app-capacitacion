@@ -1,7 +1,7 @@
 <template>
     <v-container fluid grid-list-md> 
         <v-layout wrap>
-            <v-flex xs12 sm6 md6>
+            <v-flex xs12 sm12 md6>
                 <v-card flat>
                     <v-card-title class="headline">
                         <v-icon>book</v-icon>
@@ -15,39 +15,44 @@
                         <v-card-text>
                             <v-container grid-list-md>
                                 <v-layout wrap>
-                                     <v-flex xs12 sm6 md5>
-                                         <v-text-field label="Cantidad de horas" type="number" v-model="horas" max-length="8" min-length="8"></v-text-field>
-                                    </v-flex>
-                                    <v-flex xs12 sm6 md7>
+                                    <v-flex xs12 sm12 md6>
                                         <v-text-field label="Nombre de la capacitación" type="text" v-model="nombre"></v-text-field>
                                     </v-flex>
                                     <v-flex xs12 sm12 md6>
                                         <v-text-field label="Registro N°" type="number" v-model="numeroregistro"></v-text-field>
                                     </v-flex>
-                                    <v-flex xs12 sm12 md6>
+                                    <v-flex xs12 sm12 md3>
+                                         <v-text-field label="Cantidad de horas"  type="number" v-model="creditos" max-length="8" min-length="8"></v-text-field>
+                                    </v-flex>
+                                    <v-flex xs12 sm12 md2>
+                                        <v-text-field label="Créditos" type="number" disabled v-model="creditos" required></v-text-field>
+                                    </v-flex>
+                                    <v-flex xs12 sm12 md7>
                                         <v-text-field label="Lugar de la capacitación" type="text" v-model="direccion"></v-text-field>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md6>
-                                        <v-list>
+                                    <v-flex xs12 sm12 md6>
+                                        <v-text-field label="Institución" type="text" v-model="institucion" required></v-text-field>
+                                        <!-- <v-list>
                                             <v-select
                                             label="Institución"
                                             menu-props="auto"
                                             v-model="institucion"
                                             :items="institucionList">
                                             </v-select>
-                                        </v-list>
+                                        </v-list> -->
                                     </v-flex>
-                                    <v-flex xs12 sm6 md6>
-                                        <v-list>
+                                    <v-flex xs12 sm12 md6>
                                             <v-select
                                             label="Micro Red"
                                             menu-props="auto"
-                                            v-model="ciudad"
+                                            v-model="microred"
+                                            return-object="true"
+                                            :hint="`${microred.text}, ${microred.code}`"
+                                            persistent-hint
                                             :items="ciudadList">
                                             </v-select>
-                                        </v-list>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md4>
+                                    <v-flex xs12 sm12 md4>
                                         <v-menu
                                         v-model="menu"
                                         :close-on-content-click="false"
@@ -56,7 +61,7 @@
                                             <template v-slot:activator="{ on }">
                                                 <v-text-field
                                                 :value="computedDateFormattedMomentjs"
-                                                label="Fecha"
+                                                label="Fecha de inicio"
                                                 readonly
                                                 v-on="on"></v-text-field>
                                             </template>
@@ -68,18 +73,38 @@
                                             </v-date-picker>
                                         </v-menu>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md3>
-                                        <v-text-field label="Créditos" type="number" v-model="creditos" required></v-text-field>
+                                    <v-flex xs12 sm12 md4>
+                                        <v-menu
+                                        v-model="menu2"
+                                        :close-on-content-click="false"
+                                        full-width
+                                        max-width="290">
+                                            <template v-slot:activator="{ on }">
+                                                <v-text-field
+                                                :value="computedDateFormattedMomentjs2"
+                                                label="Fecha de termino"
+                                                readonly
+                                                v-on="on"></v-text-field>
+                                            </template>
+                                            <v-date-picker
+                                            color="green lighten-1"
+                                            v-model="date2"
+                                            :min="minDate"
+                                            @change="menu2 = false"
+                                            locale="es">                                               
+                                            </v-date-picker>
+                                        </v-menu>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md5>
+                                    <v-flex xs12 sm12 md4>
                                         <v-select
                                         label="Establecimiento"
                                         menu-props="auto"
-                                        v-model="establecimiento.descripcion"
+                                        v-model="establecimiento"
+                                        return-object="true"
                                         :items="establecimientoList"
-                                        item-text="descripcion">
+                                        item-text="descripcion"
+                                        >
                                         </v-select>
-                                        
                                     </v-flex>
                                 </v-layout>
                             </v-container>
@@ -152,7 +177,7 @@
                         </v-dialog>
                 </v-card>
             </v-flex>
-            <v-flex xs12 sm6 md6>
+            <v-flex xs12 sm12 md6>
                 <v-card flat>
                     <v-card-title class="headline"> Lista de capacitadores </v-card-title>
                     <v-data-table
@@ -204,20 +229,24 @@ export default {
             { text: 'Opciones', value: 'estado'}
         ],
         menu: false,
+        menu2: false,
         dialogCap: false,
         dialogConfirm: false,
         searchCapacitador: '',
         moment: moment.locale('es'),
         modalCapacitadores: false,
         date1: new Date().toISOString().substr(0, 10),
+        date2: new Date().toISOString().substr(0, 10),
+        minDateLog: new Date().toISOString().substr(0, 10),
         horas: '',
         nombre: '',
         institucion: 'Universidad César Vallejo',
-        ciudad: 'TARAPOTO',
-        establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
+        ciudad: {text: 'TARAPOTO', code: '133001'},
+        establecimiento: { descripcion: 'HUAYCO TARAPOTO', codDep: '22', codProv: '09', codDist: '01', code: '133001' },
         creditos: '',
         direccion: '',
-        numeroregistro: ''
+        numeroregistro: '',
+        microred: {text: 'TARAPOTO', code: '133001'}
     }),
     computed: {
         asistentes () {
@@ -232,6 +261,12 @@ export default {
         computedDateFormattedMomentjs () {
             return this.date1 ? moment(this.date1).format('DD/MM/YYYY') : ''
         },
+        computedDateFormattedMomentjs2 () {
+            return this.date2 ? moment(this.date2).format('DD/MM/YYYY') : ''
+        },
+        minDate () {
+            return this.date1 ? moment(this.date1).format('YYYY-MM-DD') : ''
+        },
         disabledCapacitadores () {
             if(this.$store.getters.getCapacitador.length == 0) {
                 return true
@@ -243,21 +278,26 @@ export default {
             return this.$store.getters.getMicroRed
         },
         establecimientoList () {
-            return this.$store.getters.getEstablecimiento
+            return this.$store.getters.getEstablecimiento.filter(data => {
+                if(data.code == this.microred.code) {
+                    return data
+                }
+            })
         }
     },
     methods: {
         registrarCap() {
-           if(this.nombre == "" || this.horas == "" || this.creditos == "") {
+           if(this.nombre == "" || this.creditos == ""  || this.institucion == "" || this.numeroregistro == "") {
                alert("Campos vacíos. Por favor complete los campos")
            } else {
                this.$store.dispatch('registerCapacitacion', {
                    nombre: this.nombre,
-                   horas: this.horas,
+                   horas: this.creditos,
                    creditos: this.creditos,
                    institucion: this.institucion,
-                   ciudad: this.ciudad,
+                   ciudad: this.microred,
                    fecha: this.computedDateFormattedMomentjs,
+                   fechatermino: this.computedDateFormattedMomentjs2,
                    capacitadores: this.capacitadores,
                    establecimiento: this.establecimiento,
                    direccion: this.direccion,

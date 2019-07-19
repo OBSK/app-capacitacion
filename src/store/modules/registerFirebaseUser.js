@@ -25,7 +25,7 @@ const actions = {
                 telefono: payload.telefono,
                 ciudad: payload.ciudad,
                 registro: firebase.database.ServerValue.TIMESTAMP,
-                rules: 'Administrador'
+                rules: 'Visitante'
             })
         }).catch(e => {
             commit('setError', {
@@ -46,7 +46,8 @@ const actions = {
                     contrasena: user[key].contrasena,
                     telefono: user[key].telefono,
                     ciudad: user[key].ciudad,
-                    registro: user[key].registro
+                    registro: user[key].registro,
+                    rules: user[key].rules
                 })
                 commit('setUsuariosDatabase', users)
             }

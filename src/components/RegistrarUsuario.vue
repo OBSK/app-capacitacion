@@ -55,9 +55,29 @@
                             <td> {{ props.item.telefono }} </td>
                             <td> {{ props.item.ciudad }} </td>
                             <td> Registrado {{ moment(props.item.registro).locale('es').fromNow() }} </td>
+                            <td v-if="props.item.rules == 'Administrador'">
+                                <v-btn color="success" small> {{ props.item.rules }} </v-btn>
+                            </td>
+                            <td v-else>
+                                <v-btn color="warning" small title="El usuario es visitante"> Visitante  </v-btn>
+                            </td>
                             <td align="center">
                                 <v-icon small color="green" @click="changePassword" title="Cambiar contraseña">https</v-icon>
-                                <v-icon small color="red" @click="deleteUser" title="Eliminar usuario">delete</v-icon>
+                                <v-dialog v-model="dialogDelete" max-width="320px">
+                                    <v-icon v-if="props.item.rules == 'Administrador'" small color="red" title="Eliminar usuario" slot="activator">delete</v-icon>
+                                    <v-card>
+                                        <v-card-title class="title">Eliminar usuario</v-card-title>
+                                        <v-card-text>
+                                             ¿Estas seguro de eliminar al usuario {{ props.item.usuario }} ?
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn dark color="red" @click="dialogDelete = false">Cancelar</v-btn>
+                                            <v-btn dark color="green darken-2" @click="deleteUser(props.item)">De acuerdo</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                                
                             </td>
                         </template>
                         <template v-slot:no-data>
@@ -79,6 +99,7 @@ export default {
         email: '',
         telefono: '',
         contrasena: '',
+        dialogDelete: false,
         moment: moment,
         repeatContrasena: '',
         headers: [
@@ -87,6 +108,7 @@ export default {
             {text: 'Telefono', value: 'telefono'},
             {text: 'Ciudad', value: 'ciudad'},
             {text: 'Registro', value: 'registro'},
+             {text: 'Roles', value: 'rol'},
             {text: 'Opciones'}
         ]
     }),
@@ -116,8 +138,9 @@ export default {
         changePassword () {
             alert('En construcción')
         },
-        deleteUser () {
-            alert('También en construcción')
+        deleteUser (data) {
+            this.dialogDelete = false
+            this.$store.dispatch('deleteUser', data)
         }
     },
  }

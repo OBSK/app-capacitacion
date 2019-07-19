@@ -29,10 +29,13 @@
                                     <v-flex xs12 sm6 md6>
                                         <v-list>
                                             <v-select
-                                            v-model="ciudad"
-                                            :items="ciudadList"
-                                            hint="Ciudad"
-                                            persistent-hint>
+                                            label="Micro Red"
+                                            menu-props="auto"
+                                            v-model="microred"
+                                            return-object="true"
+                                            :hint="`${microred.text}, ${microred.code}`"
+                                            persistent-hint
+                                            :items="ciudadList">
                                             </v-select>
                                         </v-list>
                                     </v-flex>
@@ -44,7 +47,7 @@
                                             label="Condicion">
                                             </v-select>
                                     </v-flex>
-                                    <v-flex xs12 sm6 md6>
+                                    <v-flex xs12 sm12 md6>
                                         <v-select
                                         label="Establecimiento"
                                         menu-props="auto"
@@ -136,7 +139,7 @@
                                         <v-flex xs12 sm6 md6>
                                             <v-list>
                                                 <v-select
-                                                v-model="ciudad"
+                                                v-model="microred"
                                                 menu-props="auto"
                                                 :items="ciudadList"
                                                 label="Profesion"
@@ -198,10 +201,11 @@ export default {
         dni: '',
         datos: '',
         profesion: 'MEDICO GENERAL',
-        ciudad: 'TARAPOTO',
-        establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
+        ciudad: {text: 'TARAPOTO', code: '133001'},
+        establecimiento: { descripcion: 'HUAYCO TARAPOTO', codDep: '22', codProv: '09', codDist: '01', code: '133001' },
         condicion: 'ALUMNO',
         moment: moment,
+        microred: {text: 'TARAPOTO', code: '133001'},
         search: ''
     }),
     computed: {
@@ -229,7 +233,11 @@ export default {
             return this.$store.getters.getCondicion
         },
         establecimientoList () {
-            return this.$store.getters.getEstablecimiento
+            return this.$store.getters.getEstablecimiento.filter(data => {
+                if(data.code == this.microred.code) {
+                    return data
+                }
+            })
         }
     },
     methods: {
@@ -241,7 +249,7 @@ export default {
                     dni: this.dni,
                     datos: this.datos,
                     profesion: this.profesion,
-                    ciudad: this.ciudad,
+                    ciudad: this.microred,
                     registro: this.userActive,
                     condicion: this.condicion,
                     establecimiento: this.establecimiento

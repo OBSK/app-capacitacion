@@ -39,6 +39,7 @@ const actions = {
                     ciudad: capacitacion[key].ciudad,
                     creditos: capacitacion[key].creditos,
                     fecha: capacitacion[key].fecha,
+                    fechatermino: capacitacion[key].fechatermino,
                     horas: capacitacion[key].horas,
                     institucion: capacitacion[key].institucion,
                     nombre: capacitacion[key].nombre,
@@ -114,8 +115,8 @@ const actions = {
         })
     },
     registrarAsistentesCapacitacion({commit}, payload) {
-        firebase.database().ref('asistentescapacitacion/' + payload.id).push({
-            id: payload.asistente.id,
+        firebase.database().ref('asistentescapacitacion/' + payload.id.id).push({
+            idasistente: payload.asistente.id,
             dni: payload.asistente.dni,
             datos: payload.asistente.datos,
             registro: firebase.database.ServerValue.TIMESTAMP,
@@ -124,6 +125,12 @@ const actions = {
             replica: 'No',
             horascapacitadas: 0,
             estado: false,
+            nombrecapacitacion: payload.id.nombre,
+            idcapacitacion: payload.id.id,
+            microred: payload.id.ciudad,
+            establecimiento: payload.id.establecimiento,
+            fecha: payload.id.fecha,
+            fechatermino: payload.id.fechatermino
             // nombrecapacitacion: payload.capacitacion.nombre,
             // lugar: payload.capacitacion.direccion,
             // fecha: payload.capacitacion.fecha,
