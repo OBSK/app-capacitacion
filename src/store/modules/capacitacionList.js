@@ -115,7 +115,7 @@ const actions = {
         })
     },
     registrarAsistentesCapacitacion({commit}, payload) {
-        firebase.database().ref('asistentescapacitacion/' + payload.id.id).push({
+        firebase.database().ref('asistentescapacitacion/' + payload.id.id + "/" + payload.asistente.id).update({
             idasistente: payload.asistente.id,
             dni: payload.asistente.dni,
             datos: payload.asistente.datos,
@@ -145,23 +145,25 @@ const actions = {
         commit('setAsistentesCapacitacionPush', data)
     },
     updateReplica({commit}, payload) {
-        console.log(payload)
-        firebase.database().ref('asistentesreplica/' + payload.capacitacion.id).push({
+        firebase.database().ref('asistentesreplica/' + payload.capacitacion.id + "/" + payload.replica.idasistente).set({
             idAsist: payload.replica.idCap,
+            fecha: payload.fecha,
             registro: firebase.database.ServerValue.TIMESTAMP,
             establecimiento: payload.establecimiento
 
         }).then(res => console.log('Replica Registrada'))
     },
     registrarHorasCapacitadas({commit}, payload) {
+        console.log(payload.idcapacitacion, payload.data.idasistente)
         const horastotales = Number(payload.data.horascapacitadas) + Number(payload.totalhoras)
-        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.idCap + "/").update({
+        firebase.database().ref('asistentescapacitacion/' + payload.idcapacitacion + "/" + payload.data.idasistente + "/").update({
             ciudad: payload.data.ciudad,
+            idcapacitacion: payload.idcapacitacion,
             horascapacitadas: horastotales,
             datos: payload.data.datos,
             dni: payload.data.dni,
             estado: payload.data.estado,
-            id: payload.data.id,
+            idasistente: payload.data.idasistente,
             profesion: payload.data.profesion,
             registro: payload.data.registro
         }).then(res => {console.log("Actualizado con exito")})

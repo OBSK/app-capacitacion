@@ -79,21 +79,21 @@
                                         </v-flex>
                                         <v-flex xs12 sm6 md6>
                                             <v-menu
-                                              v-model="menu"
+                                              v-model="menu2"
                                               :close-on-content-click="false"
                                               full-width
                                               max-width="290">
                                                   <template v-slot:activator="{ on }">
                                                       <v-text-field
-                                                      :value="computedDateFormattedMomentjs"
+                                                      :value="computedDateFormattedMomentjs2"
                                                       label="Fecha"
                                                       readonly
                                                       v-on="on"></v-text-field>
                                                   </template>
                                                   <v-date-picker
                                                   color="green lighten-1"
-                                                  v-model="itemsEditCapacitaciones.fecha"
-                                                  @change="menu = false"
+                                                  v-model="date2"
+                                                  @change="menu2 = false"
                                                   locale="es">                                               
                                                   </v-date-picker>
                                               </v-menu>
@@ -152,8 +152,9 @@
                                       <v-card-title class="title">Detalle de la replica</v-card-title>
                                       <v-card-text>
                                         <v-list>
-                                          <h3>Establecimiento:  {{ detalleFindReplica.datos[0].establecimiento }}</h3>
-                                          <h3>Fecha de registro:  {{ moment(detalleFindReplica.datos[0].registro).format('DD/MM/YYYY') }} {{ moment(detalleFindReplica.datos[0].registro).locale('es').fromNow()}} </h3>
+                                          <h3>Establecimiento:  {{ dataItemReplica.establecimiento }}</h3>
+                                          <h3>Fecha de replica:  {{ moment(dataItemReplica.fecha).format('DD/MM/YYYY') }} </h3>
+                                          <h3>Fecha de registro:  {{ moment(dataItemReplica.registro).format('DD/MM/YYYY') }} {{ moment(dataItemReplica.registro).locale('es').fromNow()}} </h3>
                                         </v-list>
                                       </v-card-text>
                                     </v-card>
@@ -170,7 +171,7 @@
                                     <h3>Profesion: {{ itemsViewsCapacitador.profesion }} </h3>
                                   </v-flex>
                                   <v-flex xs12 sm12 md12>
-                                    <h3>Registrado {{ moment(itemsViewsCapacitador.registro).lang('es').fromNow() }} </h3>
+                                    <h3>Registrado {{ moment(itemsViewsCapacitador.registro).locale('es').fromNow() }} </h3>
                                   </v-flex>
                                   <v-flex xs12 sm12 md12>
                                     <h3>Ciudad {{ itemsViewsCapacitador.ciudad  }} </h3>
@@ -248,42 +249,108 @@
                                   <td> {{ props.item.ciudad }} </td>
                                   <td  title="Cantidad de horas capacitadas" >  {{ props.item.horascapacitadas }}</td>
                                   <td>
-                                    <v-btn dark v-if="Number(props.item.horascapacitadas) < Number(itemsEditCapacitaciones.horas)" small color="red" @click="dialogRegistrarCapacitacion = true; activeItemEdit = props.item">En curso</v-btn>
+                                    <v-btn dark v-if="Number(props.item.horascapacitadas) < Number(itemsEditCapacitaciones.horas)" small color="red" @click="dialogRegistrarCapacitacion = true; activeItemEdit = props.item; horastotales = 0">En curso</v-btn>
                                     <v-btn dark v-else color="success" small>Capacitado</v-btn>
                                   </td>
                                   <td>
                                     <v-btn small color="warning" v-if="Number(props.item.horascapacitadas) >= Number(itemsEditCapacitaciones.horas)" @click="dialogReplica = true; activeReplica = props.item" title="Registrar replica">Replica</v-btn>
                                   </td>
                                   <td>
-                                    <v-icon color="green" title="Ver replica" v-if="Number(props.item.horascapacitadas) >= Number(itemsEditCapacitaciones.horas)" small @click="dialogFindReplica = true; activeItemReplica = props.item"> zoom_in</v-icon>
+                                    <v-icon color="green" title="Ver replica" v-if="Number(props.item.horascapacitadas) >= Number(itemsEditCapacitaciones.horas)" small @click="activeItemReplica = props.item; findReplica(); dialogFindReplica = true;"> zoom_in</v-icon>
                                     <v-icon color="red" small @click="deleteAsistente(props.item)" title="Eliminar asistente">delete</v-icon>
                                   </td>
-                                  <!-- Registrar replica -->
+                                </template>
+                                <template v-slot:no-data>
+                                  <h3>No tenemos personas a capacitarse aquí</h3>
+                                </template>
+                              </v-data-table>
+                            </div>
+                            <!-- Registrar replica -->
                                   <v-dialog v-model="dialogReplica" max-width="640px" persistent>
                                     <v-card>
-                                      <v-card-title class="headline">¿Estas seguro de registrar la replica?</v-card-title>
+                                      <v-card-title class="headline">
+                                        Registrar replica
+                                        <v-spacer></v-spacer>
+                                        <v-icon @click="dialogReplica = false">close</v-icon>
+                                        </v-card-title>
                                       <v-card-text>
-                                        <h2>¿En que establecimiento realizó la replica?</h2>
+                                        
                                         <!-- <h2> {{ activeReplica }} </h2> -->
-                                        <v-flex xs12 sm6 md6>
-                                        <v-select
-                                              menu-props="auto"
-                                              v-model="establecimiento.descripcion"
-                                              :items="establecimientoList"
-                                              item-text="descripcion"
-                                              hint="Ingrese el establecimiento"
-                                              persistent-hint>
-                                        </v-select>
+                                        <v-flex xs12 sm6 md12>
+                                          <v-stepper v-model="step">
+                                            <v-stepper-header>
+                                              <v-stepper-step :complete="step > 1" step="1">Registrar el establecimiento</v-stepper-step>
+                                              <v-divider></v-divider>
+                                              <v-stepper-step :complete="step > 2" step="2">Registrar la fecha de replica</v-stepper-step>
+                                              <v-divider></v-divider>
+                                            </v-stepper-header>
+                                            <v-stepper-items>
+                                              <v-stepper-content step="1">
+                                                <v-card
+                                                class="mb-5"
+                                                height="200px"
+                                                elevation="0"
+                                                >
+                                                  <v-card-text>
+                                                    <h2 align="center">¿En que establecimiento realizó la replica?</h2>
+                                                  <v-select
+                                                        menu-props="auto"
+                                                        v-model="establecimiento.descripcion"
+                                                        :items="establecimientoList"
+                                                        item-text="descripcion"
+                                                        hint="Ingrese el establecimiento"
+                                                        persistent-hint>
+                                                  </v-select>
+                                                  </v-card-text>
+                                                  <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                     <v-btn @click="step = 2" color="teal darken-1" dark> Siguiente</v-btn>
+                                                  </v-card-actions>
+                                                </v-card>
+                                              </v-stepper-content>
+                                              <v-stepper-content step="2">
+                                                <v-card
+                                                height="200px">
+                                                  <v-menu
+                                                  v-model="menu2"
+                                                  :close-on-content-click="false"
+                                                  full-width
+                                                  >
+                                                    <template v-slot:activator="{ on }">
+                                                      <v-text-field
+                                                        :value="computedDateFormattedMomentjs2"
+                                                        label="Fecha de replica"
+                                                        readonly
+                                                        v-on="on"></v-text-field>
+                                                    </template>
+                                                        <v-date-picker
+                                                        color="green lighten-1"
+                                                        v-model="date2"
+                                                        @change="menu2 = false"
+                                                        locale="es">                                               
+                                                        </v-date-picker>
+                                                    </v-menu>
+                                                  <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn color="warning darken-3" @click="step = 1">
+                                                      <v-icon>keyboard_backspace</v-icon>
+                                                      Atras
+                                                    </v-btn>
+                                                    <v-btn @click="dialogReplica = false" color="red darken-2" dark>Cancelar</v-btn>
+                                                    <v-btn @click="updateReplica" color="green darken-2" dark>Registrar</v-btn>
+                                                    <!-- <v-btn @click="updateReplica" color="green darken-2" dark>Guardar</v-btn> -->
+                                                  </v-card-actions>
+                                                </v-card>
+                                              </v-stepper-content>
+                                            </v-stepper-items>
+                                          </v-stepper>
+                                          
                                         </v-flex>
                                         <!-- <p> {{ activeReplica }} </p> -->
                                       </v-card-text>
-                                      <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn @click="dialogReplica = false" color="red darken-2" dark>Cancelar</v-btn>
-                                        <v-btn @click="updateReplica" color="green darken-2" dark>Guardar</v-btn>
-                                      </v-card-actions>
                                     </v-card>
                                   </v-dialog>
+                            <!-- Dialog Registrar Capacitacion -->
                                   <v-dialog v-model="dialogRegistrarCapacitacion" max-width="640px">
                                     <v-card>
                                       <v-card-title class="title">Registrar capacitación de {{ activeItemEdit.datos }}</v-card-title>
@@ -295,16 +362,10 @@
                                         </v-card-text>
                                         <v-card-actions>
                                           <v-spacer></v-spacer>
-                                          <v-btn @click="registrarHorasCapacitadas(props.item)" color="primary">Registrar Capacitación </v-btn>
+                                          <v-btn @click="registrarHorasCapacitadas" color="primary">Registrar Capacitación </v-btn>
                                         </v-card-actions>
                                       </v-card>
                                   </v-dialog>
-                                </template>
-                                <template v-slot:no-data>
-                                  <h3>No tenemos personas a capacitarse aquí</h3>
-                                </template>
-                              </v-data-table>
-                            </div>
                           </v-card-text>
                         </v-card>
                     </v-card>
@@ -363,6 +424,7 @@ export default {
       ],
       searchCapacitacion: '',
       dialogEdit: false,
+      date2: new Date().toISOString().substr(0, 10),
       dialogDetalle: false,
       dialogCap: false,
       dialogRegistrarCapacitacion: false,
@@ -370,6 +432,7 @@ export default {
       activeItem2: '',
       searchCapacitador2: '',
       menu: false,
+      menu2: false,
       horastotales: '',
       activeItemEdit: '',
       dialogCapacitador: false,
@@ -378,7 +441,9 @@ export default {
       activeReplica: '',
       capacitadorSearch: '',
       establecimiento: { descripcion: 'TARAPOTO', codDep: '22', codProv: '09', codDist: '01' },
-      activeItemReplica: ''
+      activeItemReplica: '',
+      step: 0,
+      dataItemReplica: ''
     }),
     computed: {
       itemsCapacitaciones () {
@@ -430,29 +495,45 @@ export default {
       computedDateFormattedMomentjs () {
         return this.itemsEditCapacitaciones.fecha ? moment(this.itemsEditCapacitaciones.fecha).format('DD/MM/YYYY') : ''
       },
+      computedDateFormattedMomentjs2 () {
+        return this.date2 ? moment(this.date2).format('DD/MM/YYYY') : ''
+      },
       validar () {
         return true
       },
       establecimientoList () {
           return this.$store.getters.getEstablecimiento
       },
-      detalleFindReplica () {
-        return this.$store.getters.getReplica.find(data => {
-          if(data.id == this.itemsEditCapacitaciones.id) {
-            if(data.datos[0] != undefined) {
-                if(data.datos[0].idAsist == this.activeItemReplica.idCap) {
-                return data.datos[0]
-              }
-            }
-            else return { "id": "-LjT9HbPSM-MA2WjJdk6", "datos": [ { "establecimiento": "TARAPOTO", "idAsist": "-LjpyDHAs5_HB__G6w-d", "registro": 1563205774305, "idCap": "-LjqJmhMuyXTRN4N8B0N" } ] }
-            
-          }
-        }) || { "id": "-LjT9HbPSM-MA2WjJdk6", "datos": [ { "establecimiento": "lala", "idAsist": "", "registro": '', "idCap": "" } ] }
-      }
+      // detalleFindReplica () {
+      //   return this.$store.getters.getReplica.find(data => {
+      //     if(data.id == this.itemsEditCapacitaciones.id) {
+      //       const replicas = Object.values(data.datos)
+      //       const valorReplica = ''
+      //       replicas.forEach(e => {
+      //         if(e.idAsist == this.activeItemReplica.idasistente) {
+      //           this.dataItemReplica = e
+      //         }
+      //       })
+      //       return valorReplica            
+      //     }
+      //   }) || { "id": "-LjT9HbPSM-MA2WjJdk6", "datos": [ { "establecimiento": "lala", "idAsist": "", "registro": '', "idCap": "" } ] }
+      // }
     },
     methods: {
       deleteCapacitacion(id) {
         this.$store.dispatch('deleteCapacitacion', id)
+      },
+      findReplica() {
+        this.$store.getters.getReplica.find(data => {
+          if(data.id == this.itemsEditCapacitaciones.id) {
+            const replicas = Object.values(data.datos)
+            replicas.forEach(e => {
+              if(e.idAsist == this.activeItemReplica.idasistente) {
+                this.dataItemReplica = e
+              }
+            })
+          }
+        })
       },
       updateCapacitacion(data) {
         this.dialogEdit = false
@@ -480,11 +561,13 @@ export default {
             this.$store.dispatch('deleteAsistente', id)
 
       },
-      registrarHorasCapacitadas(data) {
+      registrarHorasCapacitadas() {
         this.$store.dispatch('registrarHorasCapacitadas', {
           idcapacitacion: this.activeItem,
           data: this.activeItemEdit,
           totalhoras: this.horastotales
+        }).then(res => {
+          this.dialogRegistrarCapacitacion = false
         })
       },
       deleteAsistente(data) {
@@ -498,7 +581,6 @@ export default {
         const capacitados = this.capacitadosToExcel.forEach(data => {
           array.push(data.datos)
         })
-        console.log(array)
         let data = XLSX.utils.json_to_sheet(array)
         const workbook = XLSX.utils.book_new()
         const filename = 'Reporte al ' + moment().format('DD-MM-YYYY') 
@@ -510,7 +592,8 @@ export default {
         this.$store.dispatch('updateReplica', {
           capacitacion: this.itemsEditCapacitaciones,
           replica: this.activeReplica,
-          establecimiento: this.establecimiento.descripcion
+          establecimiento: this.establecimiento.descripcion,
+          fecha: this.date2
         })
       }
     }
