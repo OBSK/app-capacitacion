@@ -12,7 +12,7 @@
     "firebase-admin": "^8.2.0",
     "firebaseauth": "^1.0.0",
     "http2": "^3.3.7",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "vue": "^2.6.10",
     "vue-excel-export": "^0.1.3",
